@@ -1,0 +1,43 @@
+{
+    "totalItems": 9,
+    "quotes": [
+        {
+            "id": 1,
+            "title": "Quote Title",
+            "desc": "Quote desc",
+            "status": "ACCEPTED",
+            "createdAt": "2021-03-30T06:48:13.000Z",
+            "updatedAt": "2021-03-30T06:48:13.000Z",
+            "UserId": 2,
+            "tools": ["Tool01 - 32mm 100", "Tool01 - 32mm 100", "Tool01 - 32mm 100", "Tool01 - 32mm 100"],
+            "receivedOn": "1/10/2020",
+            "attachments": ["url1", "url2"]
+        },
+        {
+            "id": 2,
+            "title": "Custom Tools",
+            "desc": "is simply dummy text of the printing and typesetti",
+            "status": "PENDING",
+            "createdAt": "2021-03-30T06:48:44.000Z",
+            "updatedAt": "2021-03-30T06:48:44.000Z",
+            "UserId": 2,
+            "tools": ["Tool01 - 32mm 100", "Tool01 - 32mm 100", "Tool01 - 32mm 100", "Tool01 - 32mm 100"],
+            "receivedOn": "1/10/2020",
+            "attachments": ["url1", "url2"]
+        },
+        {
+            "id": 3,
+            "title": "Custom Tools",
+            "desc": "is simply dummy text of the printing and typesetti",
+            "status": "PENDING",
+            "createdAt": "2021-03-30T06:49:13.000Z",
+            "updatedAt": "2021-03-30T06:49:13.000Z",
+            "UserId": 2,
+            "tools": ["Tool01 - 32mm 100", "Tool01 - 32mm 100", "Tool01 - 32mm 100", "Tool01 - 32mm 100"],
+            "receivedOn": "1/10/2020",
+            "attachments": ["url1", "url2"]
+        }
+    ],
+    "totalPages": 3,
+    "currentPage": 0
+}

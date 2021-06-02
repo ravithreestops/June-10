@@ -1,0 +1,19 @@
+{
+    "totalItems": 1,
+    "inventoryList": [
+        {
+            "id": 1,
+            "item_name": "Tools",
+            "item_desc": "desc",
+            "operations_tagged": null,
+            "availability": 2,
+            "cost": 2,
+            "createdAt": "2021-04-05T08:32:59.000Z",
+            "updatedAt": "2021-04-05T08:32:59.000Z"
+        }
+    ],
+    "totalPages": 1,
+    "currentPage": 0
+}
+
+

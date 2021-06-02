@@ -1,0 +1,17 @@
+{
+    "totalItems": 1,
+    "inspectionsList": [
+        {
+            "id": 1,
+            "item_name": "Standard"
+        },
+        {
+            "id": 2,
+            "item_name": "Normal"
+        }
+    ],
+    "totalPages": 1,
+    "currentPage": 0
+}
+
+
