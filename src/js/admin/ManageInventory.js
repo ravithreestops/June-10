@@ -1,14 +1,29 @@
 import React, { Component } from 'react';
-import inventoryJson from '../../data/inventoryData.json';
-
 import EditInventory from './EditInventory';
+import AdminService from "../services/admin.service";
 
 class ManageInventory extends Component {
     state = {
         searchValue: "",
-        listitems: inventoryJson.inventoryList,
+        listitems: [],
         selectedItem: [],
         editInventoryPage: false
+    }
+    constructor(props) {
+        super(props);
+        this.getAllInventoryList();
+    }
+    getAllInventoryList() {
+        AdminService.getAllInventory().then(
+            response => {
+                this.setState({
+                    listitems: response.data.inventory
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
     }
     handleSearchChange(e) {
         this.setState({

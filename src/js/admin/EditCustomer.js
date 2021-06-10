@@ -11,7 +11,7 @@ class EditCustomer extends Component {
         this.setState({ item: item });
     }
     saveCustomer() {
-        if(this.state.item.id != undefined) {
+        if(this.state.item.id !== undefined) {
             alert("editted Successfuly");
         } else {
             alert("New item added");

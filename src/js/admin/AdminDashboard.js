@@ -12,11 +12,7 @@ import ManageProjects from './ManageProjects';
 import ManageCustomer from './ManageCustomer';
 import ManageInspections from './ManageInspections';
 
-
 class AdminDashboard extends React.Component {
-    constructor(props) {
-        super(props);
-    }
     state = {
         pageName: '1'
     }
@@ -29,16 +25,10 @@ class AdminDashboard extends React.Component {
     render() {
         return (
             <React.Fragment>
-<Header />
-
-
-
-                
+                <Header />
                 <div className="page-body row">
                     <Slidebar onClick={this.switchPage.bind(this)}></Slidebar>
-
                     {(() => {
-
                         switch (this.state.pageName) {
                             case '1':
                                 return (
@@ -62,7 +52,7 @@ class AdminDashboard extends React.Component {
                                 )
                             case '6':
                                 return (
-                                   <ManageOperations></ManageOperations>
+                                    <ManageOperations></ManageOperations>
                                 )
                             case '7':
                                 return (

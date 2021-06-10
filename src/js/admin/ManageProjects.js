@@ -1,16 +1,31 @@
 import React, { Component } from 'react';
-import projectJson from '../../data/projectData.json';
-
 import {statusColorClass} from '../common/Utils.js';
-
 import EditProject from './EditProject';
+
+import AdminService from "../services/admin.service";
 
 class ManageProjects extends Component {
     state = {
         searchValue: "",
-        listitems: projectJson.projects,
+        listitems: [],
         selectedItem: [],
         editProjectPage: false
+    }
+    constructor(props) {
+        super(props);
+        this.getAllProjectList();
+    }
+    getAllProjectList() {
+        AdminService.getAllProjects().then(
+            response => {
+                this.setState({
+                    listitems: response.data.projects
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
     }
     handleSearchChange(e) {
         this.setState({

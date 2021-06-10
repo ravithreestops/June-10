@@ -12,7 +12,7 @@ class EditInventory extends Component {
     }
     saveInventory() {
         console.log(this.state.item);
-        if(this.state.item.id != undefined) {
+        if(this.state.item.id !== undefined) {
             alert("editted Successfuly");
         } else {
             alert("New item added");

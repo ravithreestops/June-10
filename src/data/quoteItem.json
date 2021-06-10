@@ -1,0 +1,52 @@
+{
+    "operationsList": [
+        {
+          "id": 0,
+          "operationName": "Operation1",
+          "hours": 230,
+          "workers": 3,
+          "inspection": "Standard",
+          "cost": 200,
+          "tools": [
+            {
+              "id": "tool1",
+              "item_name": "Tool1",
+              "unit": "cm",
+              "availability": 2,
+              "cost": 10
+            },
+            {
+              "id": "tool2",
+              "item_name": "Tool2",
+              "unit": "inch",
+              "availability": 20,
+              "cost": 50
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "operationName": "Op2",
+          "hours": 20,
+          "workers": 10,
+          "inspection": "Standard",
+          "cost": 230,
+          "tools": [
+            {
+              "id": "tool1",
+              "item_name": "Tool1",
+              "unit": "cm",
+              "availability": 2,
+              "cost": 10
+            },
+            {
+              "id": "tool2",
+              "item_name": "Tool2",
+              "unit": "inch",
+              "availability": 20,
+              "cost": 50
+            }
+          ]
+        }
+      ]
+}

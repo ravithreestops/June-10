@@ -1,14 +1,33 @@
 import React, { Component } from 'react';
-import WorkerJson from '../../data/workerData.json';
-
+import Popup from "../common/Popup";
+import { validationMessages } from '../common/Constants';
 import EditWorker from './EditWorker';
+import AdminService from "../services/admin.service";
 
 class ManageWorker extends Component {
     state = {
         searchValue: "",
-        listitems: WorkerJson.rows,
+        listitems: [],
         selectedItem: [],
-        editWorkerPage: false
+        editWorkerPage: false,
+        popupConfig: {},
+        isPopupOpen: false
+    }
+    constructor(props) {
+        super(props);
+        this.getAllWorkerList();
+    }
+    getAllWorkerList() {
+        AdminService.getAllWorkers().then(
+            response => {
+                this.setState({
+                    listitems: response.data.rows
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
     }
     handleSearchChange(e) {
         this.setState({
@@ -28,11 +47,36 @@ class ManageWorker extends Component {
             editWorkerPage: true
         });
     }
-    deleteWorker() {
+    handleClose = () => {
+        this.setState({
+            isPopupOpen: false
+        });
+    };
+
+    handleModalYes = () => {
+        this.setState({
+            isPopupOpen: false
+        });
+    
         var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
         this.setState({
             listitems: tempList
         });
+    };
+
+    deleteWorker() {
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            alert(validationMessages.NO_Item);
+        } else {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Confirm to Delete",
+                    body:"Are you sure you want to delete "+this.state.selectedItem.w_name,
+                    type: "confirmation"
+                }
+            });
+        }
     }
     onWorkerSelected(selectedItem) {
         this.setState({
@@ -139,6 +183,7 @@ class ManageWorker extends Component {
     render() {
         return (
             <React.Fragment>
+                 <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
                 {this.state.editWorkerPage ? <EditWorker selectedItem={this.state.selectedItem} parentCallback={this.parentCallback} /> : this.renderWorkerList()}
             </React.Fragment>
         );

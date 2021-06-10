@@ -1,14 +1,30 @@
 import React, { Component } from 'react';
-import operationsJson from '../../data/operationsData.json';
-
 import EditOperations from './EditOperations';
+
+import AdminService from "../services/admin.service";
 
 class ManageOperations extends Component {
     state = {
         searchValue: "",
-        listitems: operationsJson.operationsList,
+        listitems: [],
         selectedItem: [],
         editOperationPage: false
+    }
+    constructor(props) {
+        super(props);
+        this.getAllOperationList();
+    }
+    getAllOperationList() {
+        AdminService.getAllOperations().then(
+            response => {
+                this.setState({
+                    listitems: response.data.operations
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
     }
     handleSearchChange(e) {
         this.setState({
@@ -70,7 +86,7 @@ class ManageOperations extends Component {
                     <div className="quote-req-list">
                         <div className="row mt-1 quote-req-header">
                             <div className="col-sm">
-                                <label>Project Name</label>
+                                <label>Operation Name</label>
                             </div>
                             <div className="col-sm">
                                 <label>Description</label>
@@ -93,8 +109,8 @@ class ManageOperations extends Component {
                         </div>
                         <div className="quote-req-table">
 
-                            {this.state.listitems.filter(item =>
-                                item.projectName.toLowerCase().includes(this.state.searchValue)).map(listitem => (
+                           {this.state.listitems.filter(item =>
+                                item.o_name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
 
                                     <div className="row mt-1" key={listitem.id}>
                                         <div className="col-sm" >
@@ -102,18 +118,18 @@ class ManageOperations extends Component {
                                                 <input type="radio" className="toggle"
                                                     name="operationItem" value={listitem.id}
                                                     onChange={() => this.onOperationSelected(listitem)} />
-                                                {listitem.projectName}
+                                                {listitem.o_name}
                                             </label>
                                             
                                         </div>
                                         <div className="col-sm" >
-                                            <label className="description-truncate text-truncate">{listitem.description}</label>
+                                            <label className="description-truncate text-truncate">{listitem.o_desc}</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.startDate}</label>
+                                            <label>{listitem.createdAt}</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.endDate}</label>
+                                            <label>{listitem.updatedAt}</label>
                                         </div>
                                         <div className="col-sm" >
                                             <label>{listitem.hoursCommited}</label>

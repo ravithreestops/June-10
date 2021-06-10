@@ -1,69 +1,22 @@
 import React, { Component } from 'react';
-import { Button, CardBody, CardGroup, Col, Container, Form, Table, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
+import { Table } from 'reactstrap';
 import { Accordion, Card } from "react-bootstrap";
 import { statusColorClass } from '../common/Utils.js';
+
+import operationJson from '../../data/quoteItem.json';
 
 class QuoteReqUpdate extends Component {
   state = {
     selectedItem: this.props.selectedQuote,
     open: false,
-    operationsList: [
-      {
-        "id": 0,
-        "operationName": "Op1",
-        "hours": 230,
-        "workers": 3,
-        "inspection": "Standard",
-        "cost": 200,
-        "tools": [
-          {
-            "id": "tool1",
-            "item_name": "Tool1",
-            "unit": "cm",
-            "availability": 2,
-            "cost": 10
-          },
-          {
-            "id": "tool2",
-            "item_name": "Tool2",
-            "unit": "inch",
-            "availability": 20,
-            "cost": 50
-          }
-        ]
-      },
-      {
-        "id": 1,
-        "operationName": "Op2",
-        "hours": 20,
-        "workers": 10,
-        "inspection": "Standard",
-        "cost": 230,
-        "tools": [
-          {
-            "id": "tool1",
-            "item_name": "Tool1",
-            "unit": "cm",
-            "availability": 2,
-            "cost": 10
-          },
-          {
-            "id": "tool2",
-            "item_name": "Tool2",
-            "unit": "inch",
-            "availability": 20,
-            "cost": 50
-          }
-        ]
-      }
-    ]
+    operationsList: operationJson.operationsList
 
   }
-  setCollapse(tmp) {
+  /*setCollapse(tmp) {
     this.setState({
       open: tmp
     });
-  }
+  }*/
   resetReq() {
 
   }
@@ -80,7 +33,6 @@ class QuoteReqUpdate extends Component {
     alert("Do you want to remove tool");
   }
   handleChange = e => {
-    debugger;
     console.log(e);
   }
   handleReqAvailChange = event => {
@@ -138,11 +90,11 @@ class QuoteReqUpdate extends Component {
 
                 <div className="quote-data-div">
                   <span className="underline half blue">Submitted On</span>
-                  <p className="green-text-color">{this.state.selectedItem.createdAt}</p>
+                  <p className="green-text-color">{this.state.selectedItem.submittedBy}</p>
                 </div>
                 <div className="quote-data-div">
                   <span className="underline half blue">Attachments</span>
-                  <p className="green-text-color">{this.state.selectedItem.attachments.length}</p>
+
                 </div>
               </div>
               <div className="col quote-measurements">
@@ -155,8 +107,6 @@ class QuoteReqUpdate extends Component {
                     <span className="badge btn-blue p-2 ml-2">54354.00</span>
                   </div>
                 </div>
-
-
 
                 <div className="card-header measurements-header row mt-1 font-weight-bold">
                   <div className="col-sm">
@@ -180,14 +130,13 @@ class QuoteReqUpdate extends Component {
 
                 </div>
 
-
                 <Accordion>
 
-                {this.state.operationsList && this.state.operationsList.map((operation, i) => {
-                  return (
-                   
+                  {this.state.operationsList && this.state.operationsList.map((operation, i) => {
+                    return (
+
                       <Card>
-                        <Accordion.Toggle as={Card.Header} eventKey={i+""}>
+                        <Accordion.Toggle as={Card.Header} eventKey={i + ""}>
 
                           <div className="row mt-1 green-text-color">
                             <div className="col-sm">
@@ -212,7 +161,7 @@ class QuoteReqUpdate extends Component {
                           </div>
 
                         </Accordion.Toggle>
-                        <Accordion.Collapse eventKey={i+""}>
+                        <Accordion.Collapse eventKey={i + ""}>
                           <Card.Body>
                             {operation.tools &&
                               <Table responsive="sm">
@@ -240,11 +189,11 @@ class QuoteReqUpdate extends Component {
                                         <td>{tool.availability}</td>
                                         <td>
                                           <input
-                                          onChange={this.handleReqAvailChange}
-                                          defaultValue={tool.availability}
-                                          type="number"
-                                          min="1"
-                                          max={tool.availability+""}
+                                            onChange={this.handleReqAvailChange}
+                                            defaultValue={tool.availability}
+                                            type="number"
+                                            min="1"
+                                            max={tool.availability + ""}
                                           />
                                         </td>
                                         <td>{tool.cost}</td>
@@ -258,16 +207,10 @@ class QuoteReqUpdate extends Component {
                           </Card.Body>
                         </Accordion.Collapse>
                       </Card>
-                   
-                  );
-                })}
-               </Accordion>
 
-
-
-
-
-                
+                    );
+                  })}
+                </Accordion>
 
               </div>
 
@@ -276,7 +219,6 @@ class QuoteReqUpdate extends Component {
           </div>
 
         </div>
-
 
       </React.Fragment>
     );
