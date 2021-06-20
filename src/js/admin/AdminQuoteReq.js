@@ -84,7 +84,7 @@ class AdminQuoteReq extends Component {
                 isPopupOpen: true,
                 popupConfig : {
                     header: "Message",
-                    body:"Select one item",
+                    body:validationMessages.NO_ITEM,
                     type: "message"
                 }
             });
@@ -93,7 +93,7 @@ class AdminQuoteReq extends Component {
                 isPopupOpen: true,
                 popupConfig : {
                     header: "Confirm to Delete",
-                    body:"Are you sure you want to delete "+this.state.selectedItem.title,
+                    body:validationMessages.DELETE_CONFIRM+this.state.selectedItem.title,
                     type: "confirmation"
                 }
             });
@@ -102,7 +102,14 @@ class AdminQuoteReq extends Component {
 
     editQuote() {
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            alert(validationMessages.NO_Item);
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
         } else {
             this.setState({
                 updateQuotePage: true

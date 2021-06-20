@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import UserService from "../services/user.service";
 
 var rowIndex = 0;
 function Quote() {
@@ -106,7 +107,34 @@ function Quote() {
         
       };
       const sendQuoteReq = () => {
-        console.log(formInputList);
+        //console.log(formInputList);
+        var data = {
+            "title": "quote11",
+            "desc": "is simply dummy text of the printing and typesetti",
+            "status" : "ACCEPTED",
+            "measures": [
+                {
+                    "name": "qq",
+                    "unit": "1",
+                    "qty": "12"
+                }
+            ],
+            "uploads": [
+                {
+                    "fileName": "haaaajkdfjkldsajfdsfdslk",
+                    "filePath": "1234567890qsfdsfdfghdwertg"
+                }
+            ]
+        };
+
+        UserService.createQuote(data).then(
+            response => {
+                console.log(response);
+            },
+            error => {
+                console.log("Error");
+            }
+        );
       };
 
     const renderFormRow = (x) => {
