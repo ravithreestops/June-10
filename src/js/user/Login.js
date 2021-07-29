@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
-import { Button, Card, CardBody, CardGroup, Col, Form, Input, InputGroup, Row } from 'reactstrap';
+import React, { Component } from "react";
+import { Button, Card, CardBody, CardGroup, Col, Form, Input, InputGroup, Row } from "reactstrap";
+//import Spinner from 'react-bootstrap/Spinner';
 import { isEmail } from "validator";
 
+import {loginMessages, usersTag} from '../common/Constants';
+import MyAlert from "../components/MyAlert";
+import Popup from "../components/Popup";
+
 import AuthService from "../services/auth.service";
-import MyAlert from "../common/MyAlert";
-import {loginMessages} from '../common/Constants';
-
-import Popup from "../common/Popup";
-
 
 class Login extends Component {
 
@@ -34,81 +34,73 @@ class Login extends Component {
     Password(event) {
         this.setState({ Password: event.target.value })
     }
+    showAlertMessage(msg) {
+        this.setState(prevState => ({
+            alertConfig: { 
+                ...prevState.alertConfig,
+                message: msg
+            },
+            showAlert: true 
+        }))
+    }
     loginValidation(event) {
         if(this.state.Email === '' || this.state.Password === '') {
-            this.state.alertConfig.message = loginMessages.REQUIRED;
-            this.setState({ showAlert: true });
-        }else if (!isEmail(this.state.Email)) {
-            this.state.alertConfig.message = loginMessages.EMAILERROR;
-            this.setState({ showAlert: true });
+            this.showAlertMessage(loginMessages.REQUIRED);
+        } else if (!isEmail(this.state.Email)) {
+            this.showAlertMessage(loginMessages.EMAILERROR);
          } else {
             this.handleLogin(event);
+            //this.props.history.push("/WorkerDashboard");
+            //this.props.history.push("/AdminDashboard");
          }
     }
-    handleLogin(event) {
 
+    handleLogin(event) {
         var data = JSON.stringify({
             "email": this.state.Email,
             "password": this.state.Password
         });
         AuthService.login(data).then(
+            
             response => {
-                console.log(response);
                 if (response && response.data) {
-                    if(response.data.userId === 5) {
+                    if(response.data.userId === usersTag.USER_TAG) {
                         this.props.history.push("/Dashboard");
-                    } else if(response.data.userId === 15){
+                    } else if(response.data.userId === usersTag.ADMIN_TAG){
                         this.props.history.push("/AdminDashboard");
-                    }
-                    
+                    } 
                 } else {
-                    this.state.alertConfig.message = loginMessages.ERROR;
-                    this.setState({ showAlert: true });
+                    this.showAlertMessage(loginMessages.ERROR);
                 }
             },
             error => {
-                this.state.alertConfig.message = loginMessages.ERROR;
-                this.setState({ showAlert: true });
+                this.showAlertMessage(loginMessages.ERROR);
             }
         );
-
-        /*
-                if(this.state.Email === 'admin' && this.state.Password === 'admin') {
-                    this.props.history.push("/AdminDashboard");
-                } else if(this.state.Email != '' && this.state.Password!= '') {
-                    this.props.history.push("/Dashboard");
-                } else {
-                    alert(loginMessages.ERROR);
-                }
-             */
-
-
     }
+
     forgotPassword  = () =>  {
         this.setState({
             isPopupOpen: true,
             popupConfig : {
-                header: "Message",
-                body: "sgfsdgfdg gfds",
-                type: "message"
+                header: "Forgot Password",
+                body: "",
+                type: "forgotPassword"
             }
         });
     }
+
     handleClose = () => {
         this.setState({
             isPopupOpen: false
         });
     };
 
-    handleModalYes = () => {
-        this.setState({
-            isPopupOpen: false
-        });
-    };
+
     render() {
         return (
-            
            <Row className="justify-content-center login-div">
+
                 <Col md="9" lg="7" xl="6">
                     <CardGroup>
                         <Card className="p-2">
@@ -120,18 +112,17 @@ class Login extends Component {
                                     <InputGroup className="mb-4">
                                         <Input type="password" onChange={this.Password} placeholder="Enter Password" />
                                     </InputGroup>
-
-                                    <p className="forgot-password text-right">Forgot <a onClick = {this.forgotPassword} href="#" >password?</a></p>
-
+                                    <p className="forgot-password text-right">Forgot <span role="button" className="text-primary" onClick = {this.forgotPassword} >password?</span></p>
                                     <Button color="success" onClick={this.loginValidation} >Login</Button>
                                 </Form>
-                                {this.state.showAlert && < MyAlert alertConfig = {this.state.alertConfig} showAlert={this.state.showAlert} />}
+                                {this.state.showAlert && < MyAlert alertConfig = {this.state.alertConfig} showAlert={this.state.showAlert} /> }
                             </CardBody>
                         </Card>
                     </CardGroup>
                 </Col>
-                <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
+                <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} ></Popup>
             </Row>
+            
         );
     }
 }

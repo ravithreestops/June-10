@@ -33,12 +33,12 @@ class EditCustomer extends Component {
                         <div className="col-4">
 
                             <nav aria-label="breadcrumb">
-                                <ul class="breadcrumb">
-                                    <li class="breadcrumb-item" onClick={this.handleBreadCrumb.bind(this)}>
+                                <ul className="breadcrumb">
+                                    <li className="breadcrumb-item" onClick={this.handleBreadCrumb.bind(this)}>
                                         <span className="mb-1 underline">Manage</span>
                                         <span className="mb-1 blue-color pl-2">Customer</span>
                                     </li>
-                                    <li class="breadcrumb-item active" aria-current="page">
+                                    <li className="breadcrumb-item active" aria-current="page">
                                         <span className="mb-1">{(this.state.item.length !== 0) ? 'Edit' : 'Add'}</span>
                                         <span className="mb-1 blue-color pl-2">Customer</span>
                                     </li>

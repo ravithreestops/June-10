@@ -1,10 +1,7 @@
-import React,{useState} from 'react';
-import {Button} from 'react-bootstrap';
+import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 
 function MyAlert({alertConfig,showAlert}) {
-    const [show, setShow] = useState(showAlert);
-  
     return (
       <>
         <Alert variant={alertConfig.variant}>

@@ -16,9 +16,11 @@ class ManageInventory extends Component {
     getAllInventoryList() {
         AdminService.getAllInventory().then(
             response => {
-                this.setState({
-                    listitems: response.data.inventory
-                });
+                if(response){
+                    this.setState({
+                        listitems: response.data.inventory
+                    });
+                }
             },
             error => {
               console.log("Error");

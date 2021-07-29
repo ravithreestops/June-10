@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import AdminService from "../services/admin.service";
+
 class EditInventory extends Component {
     state = {
         item: this.props.selectedItem,
@@ -15,9 +17,51 @@ class EditInventory extends Component {
         if(this.state.item.id !== undefined) {
             alert("editted Successfuly");
         } else {
-            alert("New item added");
+            //alert("New item added");
+            this.createInventory();
         }
         this.props.parentCallback();
+    }
+    createInventory() {
+        /**
+         {
+    "__comment": "Operations is not mandatory , you can tag operations later",
+    "itemName": "Screw",
+    "itemDesc": "Description For Screw",
+    "availability": 250,
+    "cost": 10,
+    "supplier_email": "sanjith@g.com",
+    "operations": [
+        {
+            "id": 1
+        }
+    ]
+}
+         */
+
+console.log(this.state.item);
+        var data = {
+            "itemName": "Screw",
+            "itemDesc": "Description For Screw",
+            "availability": 250,
+            "cost": 10,
+            "supplier_email": "sanjith@g.com",
+            "operations": [
+                {
+                    "id": 1
+                }
+            ]
+        };
+
+        AdminService.createInventory(data).then(
+            response => {
+                console.log(response);
+                alert("New item added");
+            },
+            error => {
+                console.log("Error");
+            }
+        ); 
     }
     resetReq() {
 

@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
-import EditOperations from './EditOperations';
 
+import jsonData from "../../data/operationsData.json";
 import AdminService from "../services/admin.service";
 
-import OperationJson from '../../data/operationsData.json';
-
-class ManageOperations extends Component {
+class WorkerOperations extends Component {
     state = {
         searchValue: "",
-        listitems: OperationJson.operationsList,
+        listitems: jsonData.operationsList,
         selectedItem: [],
         editOperationPage: false
     }
-    /*constructor(props) {
+    constructor(props) {
         super(props);
         //this.getAllOperationList();
-    }*/
+    }
     getAllOperationList() {
         AdminService.getAllOperations().then(
             response => {
@@ -78,7 +76,7 @@ class ManageOperations extends Component {
                         <div className="col-8 text-right">
                             <div className="has-search">
                                 <span className="fa fa-search form-control-feedback"></span>
-                                <input type="text" className="form-control search-box" placeholder="Search operations..." onChange={this.handleSearchChange.bind(this)} />
+                                <input type="text" className="form-control search-box" placeholder="Search quote requests..." onChange={this.handleSearchChange.bind(this)} />
                             </div>
                             <button className="btn delete-btn" onClick={() => this.deleteOperations()}></button>
                             <button className="btn edit-btn" onClick={() => this.editOperations()}></button>
@@ -152,9 +150,9 @@ class ManageOperations extends Component {
     render() {
         return (
             <React.Fragment>
-                {this.state.editOperationPage ? <EditOperations selectedItem={this.state.selectedItem} parentCallback= {this.parentCallback}/> : this.renderOperationsList()}
+                {this.renderOperationsList()}
             </React.Fragment>
         );
     }
 }
-export default ManageOperations;
+export default WorkerOperations;

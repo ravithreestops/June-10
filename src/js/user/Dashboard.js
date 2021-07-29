@@ -1,26 +1,32 @@
 import React, { Component } from 'react';
-import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
 
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 
-import QuoteList from './QuoteList'
+import QuoteList from './QuoteList';
 import Quote from './Quote';
-import QuoteDetail from './QuoteDetail' 
+import QuoteDetail from './QuoteDetail' ;
+
+import AdminService from "../services/admin.service";
 
 class Dashboard extends Component {
     state = {
         isQuoteDetailActive:false,
-        quoteItem : null
+        quoteItem : null,
+        selectedQuoteId: null
      }
      selectedOuoteItem = (childData) =>{
         console.log("selectedOuoteItem");
-        if(childData != undefined){
-            this.setState({
-                isQuoteDetailActive:true,
-                isQuoteEditActive: false,
-                quoteItem: childData
-              });
+        console.log(childData);
+        if(childData !== undefined){
+
+            this.getSingleQuote(childData.id);
+
+
+           
+
+
+
         } else {
             this.setState({
                 isQuoteDetailActive:false,
@@ -29,6 +35,35 @@ class Dashboard extends Component {
         }
         
     }
+
+    getSingleQuote = (id) => {
+        AdminService.getSingleQuote(id).then(
+            response => {
+              console.log(response);
+              
+                if(response) {
+
+                  /*this.setState({
+                    selectedItem: response.data,
+                    formInputList: response.data.Measures
+                  });*/
+
+                  this.setState({
+                    isQuoteDetailActive:true,
+                    isQuoteEditActive: false,
+                    quoteItem: response.data
+                    
+                  });
+
+
+                }
+            },
+            error => {
+              console.log("Error");
+            }
+          );   
+    };
+
     quoteEdit = () => {
         this.setState({
             isQuoteEditActive:true

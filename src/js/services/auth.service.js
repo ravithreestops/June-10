@@ -5,7 +5,6 @@ const API_URL = "https://funetus-api.herokuapp.com/auth/";
 class AuthService {
 
     login(data) {
-
         var config = {
             method: 'post',
             url: API_URL + 'login',
@@ -14,7 +13,6 @@ class AuthService {
             },
             data: data
         };
-
         return axios(config)
             .then(function (response) {
                 if(response.data) {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Popup from "../common/Popup";
+import Popup from "../components/Popup";
 import { validationMessages } from '../common/Constants';
 import EditWorker from './EditWorker';
 import AdminService from "../services/admin.service";
@@ -20,9 +20,11 @@ class ManageWorker extends Component {
     getAllWorkerList() {
         AdminService.getAllWorkers().then(
             response => {
-                this.setState({
-                    listitems: response.data.rows
-                });
+                if(response) {
+                    this.setState({
+                        listitems: response.data.rows
+                    });
+                } 
             },
             error => {
               console.log("Error");
@@ -131,7 +133,7 @@ class ManageWorker extends Component {
                 </div>
                 <div className="quote-req-table">
                     {this.state.listitems.filter(item =>
-                        item.w_name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
+                        item.w_name && item.w_name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
 
 
                             <div className="row mt-1" key={listitem.id}>

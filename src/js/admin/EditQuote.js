@@ -1,26 +1,77 @@
 import React, { Component } from 'react';
-import { Table } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import { Accordion, Card } from "react-bootstrap";
+
 import { statusColorClass } from '../common/Utils.js';
+import Popup from "../components/Popup";
+
+import AdminService from "../services/admin.service";
 
 import operationJson from '../../data/quoteItem.json';
 
 class QuoteReqUpdate extends Component {
   state = {
-    selectedItem: this.props.selectedQuote,
+    selectedItem: {},
     open: false,
-    operationsList: operationJson.operationsList
-
+    operationsList: operationJson.operationsList,
+    popupConfig: {},
+    isPopupOpen: false,
+    selectedOperationId: 0
   }
-  /*setCollapse(tmp) {
-    this.setState({
-      open: tmp
-    });
-  }*/
+  constructor(props) {
+    super(props);
+    this.getSingleQuote();
+  }
+  getSingleQuote = () => {
+    AdminService.getSingleQuote(this.props.selectedQuoteId).then(
+      response => {
+        if (response) {
+          this.setState({
+            selectedItem: response.data
+          });
+        }
+      },
+      error => {
+        console.log("Error");
+      }
+    );
+  };
   resetReq() {
 
   }
+  showAvailableTools(id) {
+    this.setState({
+      selectedOperationId: id,
+      isPopupOpen: true,
+      popupConfig: {
+        header: "Available Tools",
+        body: '',
+        type: "toolsList"
+      }
+    });
+  }
+
+
   saveQuoteUpdate() {
+
+    // need to change based on measurements
+    var data = {
+      "title": "Custom Tools Edit test",
+      "desc": "is simply dummy text of the printing and typesetti",
+      "measures": [{ "name": "subin", "unit": "1", "qty": "12" }],
+      "uploads": [{
+        "fileName": "haaaajkdfjkldsajfdsfdslk",
+        "filePath": "1234567890qsfdsfdfghdwertg"
+      }]
+    };
+    AdminService.editQuote(this.props.selectedQuoteId, data).then(
+      response => {
+        console.log(response);
+      },
+      error => {
+        console.log("Error");
+      }
+    );
 
   }
   handleBreadCrumb() {
@@ -41,21 +92,65 @@ class QuoteReqUpdate extends Component {
     alert(value);
     this.setState({ value });
   }
+  handleClose = (list) => {
+    if(list) {
+      var newToolsList = [...this.state.operationsList[0].tools, ...list];
+      this.setState(prevState => ({
+        operationsList: prevState.operationsList.map(
+          obj => (obj.id === this.state.selectedOperationId ? Object.assign(obj, { tools: newToolsList }) : obj)
+        )
+      }));
+    }
+    
+    this.setState({
+      isPopupOpen: false
+    });
+  };
+
+  handleModalYes = () => {
+    this.setState({
+      isPopupOpen: false
+    });
+    AdminService.deleteQuote(this.state.selectedItem.id).then(
+      response => {
+        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+        this.setState({
+          listitems: tempList,
+          selectedItem: []
+        });
+      },
+      error => {
+        console.log("Error");
+      }
+    );
+
+
+  };
   render() {
+
+    var userData = {};
+    var uploads = [];
+    if (this.state.selectedItem) {
+      userData = this.state.selectedItem.User;
+      uploads = this.state.selectedItem.Uploads;
+    }
+
     return (
       <React.Fragment>
+        <Popup popupConfig={this.state.popupConfig} openFlag={this.state.isPopupOpen} parentCloseCallback={this.handleClose} parentConfirmCallback={this.handleModalYes.bind(this)}></Popup>
+
 
         <div className="col admin-quote-page">
           <div className="list-group-header section-header row">
             <div className="col-4">
 
               <nav aria-label="breadcrumb">
-                <ul class="breadcrumb">
-                  <li class="breadcrumb-item" onClick={this.handleBreadCrumb.bind(this)}>
+                <ul className="breadcrumb">
+                  <li key="breadcrumb1" className="breadcrumb-item" onClick={this.handleBreadCrumb.bind(this)}>
                     <span className="mb-1 underline">Quote</span>
                     <span className="mb-1 blue-color pl-2">Requests</span>
                   </li>
-                  <li class="breadcrumb-item active" aria-current="page">
+                  <li key="breadcrumb2" className="breadcrumb-item active" aria-current="page">
                     <span className="mb-1">Update</span>
                     <span className="mb-1 blue-color pl-2">Quote</span>
                   </li>
@@ -85,15 +180,16 @@ class QuoteReqUpdate extends Component {
 
                 <div className="quote-data-div">
                   <span className="underline half blue">Submitted By</span>
-                  <p className="green-text-color">{this.state.selectedItem.submittedBy}</p>
+                  <p className="green-text-color">{userData && userData.name}</p>
                 </div>
 
                 <div className="quote-data-div">
                   <span className="underline half blue">Submitted On</span>
-                  <p className="green-text-color">{this.state.selectedItem.submittedBy}</p>
+                  <p className="green-text-color">{(new Date(this.state.selectedItem.createdAt)).toLocaleDateString()}</p>
                 </div>
                 <div className="quote-data-div">
                   <span className="underline half blue">Attachments</span>
+                  <p className="green-text-color">{uploads && uploads.length}</p>
 
                 </div>
               </div>
@@ -135,7 +231,7 @@ class QuoteReqUpdate extends Component {
                   {this.state.operationsList && this.state.operationsList.map((operation, i) => {
                     return (
 
-                      <Card>
+                      <Card key={i+"cardKey"}>
                         <Accordion.Toggle as={Card.Header} eventKey={i + ""}>
 
                           <div className="row mt-1 green-text-color">
@@ -155,7 +251,7 @@ class QuoteReqUpdate extends Component {
                               <label>{operation.cost}</label>
                             </div>
                             <div className="col-sm">
-                              <label>{operation.tools.length}</label>
+                              <label>{operation.tools && operation.tools.length}</label>
                               <button onClick={this.deleteOperation.bind(this)} className="btn delete-btn float-right mr-5" ></button>
                             </div>
                           </div>
@@ -163,7 +259,9 @@ class QuoteReqUpdate extends Component {
                         </Accordion.Toggle>
                         <Accordion.Collapse eventKey={i + ""}>
                           <Card.Body>
+                            <Button color="success" size="sm" onClick={() => this.showAvailableTools(operation.id)}>Add tools</Button>
                             {operation.tools &&
+
                               <Table responsive="sm">
                                 <tbody>
                                   <tr className="green-text-color2">
@@ -178,9 +276,9 @@ class QuoteReqUpdate extends Component {
                                     <th><button className="btn delete-btn" onClick={this.removeTool.bind(this)}></button></th>
                                   </tr>
 
-                                  {operation.tools.map((tool, i) => {
+                                  {operation.tools && operation.tools.map((tool, i) => {
                                     return (
-                                      <tr>
+                                      <tr key={tool.id+"row"}>
                                         <td>
                                           <input type="checkbox" value="" />
                                         </td>

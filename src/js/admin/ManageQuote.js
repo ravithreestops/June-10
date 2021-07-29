@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 
-import Popup from "../common/Popup";
-import QuoteReqUpdate from './QuoteReqUpdate';
+import Popup from "../components/Popup";
+import EditQuote from './EditQuote';
 import { validationMessages } from '../common/Constants';
 import { statusColorClass } from '../common/Utils.js';
 import AdminService from "../services/admin.service";
 
-class AdminQuoteReq extends Component {
+class ManageQuote extends Component {
 
     state = {
         searchValue: "",
@@ -25,7 +25,7 @@ class AdminQuoteReq extends Component {
             <React.Fragment>
                 <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
 
-                {this.state.updateQuotePage ? <QuoteReqUpdate selectedQuote= {this.state.selectedItem} parentCallback= {this.parentCallback}/> : this.renderQuoteList() }
+                {this.state.updateQuotePage ? <EditQuote selectedQuoteId= {this.state.selectedItem.id} parentCallback= {this.parentCallback}/> : this.renderQuoteList() }
 
             </React.Fragment>
         );
@@ -33,9 +33,11 @@ class AdminQuoteReq extends Component {
     getAllQuoteCall() {
         AdminService.getAllQuotes().then(
             response => {
-                this.setState({
-                    listitems: response.data.quotes
-                });
+                if(response){
+                    this.setState({
+                        listitems: response.data.rows
+                    });
+                }
             },
             error => {
                 console.log("Error");
@@ -65,18 +67,18 @@ class AdminQuoteReq extends Component {
         });
         AdminService.deleteQuote(this.state.selectedItem.id).then(
             response => {
-                console.log("Succ");
+                var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+                this.setState({
+                    listitems: tempList,
+                    selectedItem: []
+                });
             },
             error => {
               console.log("Error");
             }
           );
 
-        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
-        this.setState({
-            listitems: tempList,
-            selectedItem: []
-        });
+        
     };
     deleteQuote() {
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
@@ -162,7 +164,7 @@ class AdminQuoteReq extends Component {
                     </div>
                 </div>
                 <div className="quote-req-table">
-                    {this.state.listitems.filter(item =>
+                    {this.state.listitems && this.state.listitems.filter(item =>
                         item.title.toLowerCase().includes(this.state.searchValue)).map(item => (
                             <div className="row mt-1" key={item.id}>
                                 <div className="col-4" >
@@ -198,4 +200,4 @@ class AdminQuoteReq extends Component {
     }
     
 }
-export default AdminQuoteReq;
+export default ManageQuote;

@@ -18,9 +18,11 @@ class ManageProjects extends Component {
     getAllProjectList() {
         AdminService.getAllProjects().then(
             response => {
-                this.setState({
-                    listitems: response.data.projects
-                });
+                if(response){
+                    this.setState({
+                        listitems: response.data.projects
+                    });
+                }
             },
             error => {
               console.log("Error");

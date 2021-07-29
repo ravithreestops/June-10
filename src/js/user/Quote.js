@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import UserService from "../services/user.service";
+
 
 var rowIndex = 0;
 function Quote() {
@@ -50,10 +50,11 @@ function Quote() {
     };
 
     const handleFormChange = (event) => {
-        var target = event.target;
-        var value = target.value;
-        var name = target.name;
-        debugger;
+        //var name = event.target.name;
+        //var value = event.target.value;
+
+        //this.setState({ name: value })
+        
     };
 
     // handle click event of the Remove button
@@ -107,9 +108,10 @@ function Quote() {
         
       };
       const sendQuoteReq = () => {
-        //console.log(formInputList);
+        console.log(formInputList);
+        /*
         var data = {
-            "title": "quote11",
+            "title": "quote2222234",
             "desc": "is simply dummy text of the printing and typesetti",
             "status" : "ACCEPTED",
             "measures": [
@@ -134,11 +136,11 @@ function Quote() {
             error => {
                 console.log("Error");
             }
-        );
+        ); */
       };
 
     const renderFormRow = (x) => {
-        return Object.keys(x).filter((obj) => Object.keys(x).indexOf(obj) == 0).map(obj => {
+        return Object.keys(x).filter((obj) => Object.keys(x).indexOf(obj) === 0).map(obj => {
             return (
 
                 <div className="row mt-1" key={obj}>
@@ -147,7 +149,7 @@ function Quote() {
                         return (
                             <div className="col-sm">
                                 <input
-                                    class="form-control"
+                                    className="form-control"
                                     name={dataItem.name}
                                     value={dataItem.value}
                                     onChange={e => handleInputChange(e, obj, j)}
@@ -161,7 +163,7 @@ function Quote() {
                     <div className="col-sm">
                         <div className="btn-box">
                             <button
-                                class="btn btn-primary btn-sm pr-4 pl-4"
+                                className="btn btn-primary btn-sm pr-4 pl-4"
                                 onClick={() => handleRemoveClick(obj)}>Remove</button>
 
                         </div>
@@ -181,29 +183,29 @@ function Quote() {
                     <span className="mb-1 blue-color pl-2">Quote Request</span>
                 </div>
                 <div className="col text-right">
-                    <button type="button" class="btn btn-blue btn-sm pr-4 pl-4" onClick={() => cancelQuote()} >Reset</button>
-                    <button type="button" class="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick= {() => sendQuoteReq()}>Send</button>
+                    <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => cancelQuote()} >Reset</button>
+                    <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick= {() => sendQuoteReq()}>Send</button>
                 </div>
             </div>
             <div className="blue-box-div" id="create-quote-form">
 
-                <div class="form-group">
-                    <label for="title">Title</label>
-                    <input type="text" class="form-control" id="title" 
+                <div className="form-group">
+                    <label htmlFor="title">Title</label>
+                    <input type="text" className="form-control" id="title" 
                     name="title"
                     onChange={e => handleFormChange(e)}
                     />
                 </div>
 
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea class="form-control" id="description" rows="3"></textarea>
+                <div className="form-group">
+                    <label htmlFor="description">Description</label>
+                    <textarea className="form-control" id="description" rows="3"></textarea>
                 </div>
 
 
-                <div class="form-group">
+                <div className="form-group">
                     <label>Measurements</label>
-                    <button class="btn add-btn " onClick={handleAddClick}></button>
+                    <button className="btn add-btn " onClick={handleAddClick}></button>
                     {renderFormRowHeader()}
                     {formInputList.map((x, i) => {
                         return (renderFormRow(x, i));
@@ -212,7 +214,7 @@ function Quote() {
 
                 <div>
                     <label>Attachments</label>
-                    <label class="btn btn-blue btn-sm pr-4 pl-4 ml-2">
+                    <label className="btn btn-blue btn-sm pr-4 pl-4 ml-2">
                         Browse <input type="file" hidden />
                     </label>
                 </div>
