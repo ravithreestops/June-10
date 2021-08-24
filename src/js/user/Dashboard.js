@@ -3,30 +3,25 @@ import React, { Component } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 
+import Popup from "../components/Popup";
+
 import QuoteList from './QuoteList';
 import Quote from './Quote';
 import QuoteDetail from './QuoteDetail' ;
 
-import AdminService from "../services/admin.service";
+import UserService from "../services/user.service";
 
 class Dashboard extends Component {
     state = {
         isQuoteDetailActive:false,
         quoteItem : null,
-        selectedQuoteId: null
+        selectedQuoteId: null,
+        popupConfig: {},
+        isPopupOpen: false
      }
      selectedOuoteItem = (childData) =>{
-        console.log("selectedOuoteItem");
-        console.log(childData);
         if(childData !== undefined){
-
             this.getSingleQuote(childData.id);
-
-
-           
-
-
-
         } else {
             this.setState({
                 isQuoteDetailActive:false,
@@ -36,18 +31,16 @@ class Dashboard extends Component {
         
     }
 
+    handleClose = () => {
+      this.setState({
+          isPopupOpen: false
+      });
+    }
+
     getSingleQuote = (id) => {
-        AdminService.getSingleQuote(id).then(
+      UserService.getSingleQuote(id).then(
             response => {
-              console.log(response);
-              
-                if(response) {
-
-                  /*this.setState({
-                    selectedItem: response.data,
-                    formInputList: response.data.Measures
-                  });*/
-
+              if(response) {
                   this.setState({
                     isQuoteDetailActive:true,
                     isQuoteEditActive: false,
@@ -69,16 +62,37 @@ class Dashboard extends Component {
             isQuoteEditActive:true
           });
     }
+    quoteCreateCallBack = (response) => {
+      var quoteItem = response.data;
+      quoteItem['Measures'] = quoteItem.measures;
+      this.setState({
+          isQuoteDetailActive:true,
+          isQuoteEditActive: false,
+          quoteItem: quoteItem
+      });
+
+
+      this.setState({
+        isPopupOpen: true,
+        popupConfig : {
+            header: "Message",
+            body:response.message,
+            type: "message"
+        }
+      });
+
+    }
     render() {
         return (  
             <React.Fragment>
+                <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)}></Popup>
                  <Header/>
                  <div className="page-body row">
                     <div className="col">
                         <QuoteList parentCallback = {this.selectedOuoteItem}/>
                     </div>
                     <div className="col">
-                        {!this.state.isQuoteDetailActive ? <Quote /> : null }  
+                        {!this.state.isQuoteDetailActive ? <Quote parentCreateCallBack = {this.quoteCreateCallBack}/> : null }  
                         {this.state.isQuoteDetailActive ? <QuoteDetail isQuoteEditActive = {this.state.isQuoteEditActive} parentEditCallBack = {this.quoteEdit} dataFromParent = {this.state.quoteItem} parentCallback = {this.selectedOuoteItem}/> : null }
                     </div>
                 </div>

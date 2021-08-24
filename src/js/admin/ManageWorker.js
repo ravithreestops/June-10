@@ -37,9 +37,20 @@ class ManageWorker extends Component {
         });
     }
     editWorker() {
-        this.setState({
-            editWorkerPage: true
-        });
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
+        } else {
+            this.setState({
+                editWorkerPage: true
+            });
+        }
     }
     addWorker() {
         this.setState({
@@ -59,22 +70,36 @@ class ManageWorker extends Component {
         this.setState({
             isPopupOpen: false
         });
-    
-        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
-        this.setState({
-            listitems: tempList
-        });
+        AdminService.deleteWorker(this.state.selectedItem.id).then(
+            response => {
+                var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+                this.setState({
+                    listitems: tempList,
+                    selectedItem: []
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
     };
 
     deleteWorker() {
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            alert(validationMessages.NO_Item);
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
         } else {
             this.setState({
                 isPopupOpen: true,
                 popupConfig : {
                     header: "Confirm to Delete",
-                    body:"Are you sure you want to delete "+this.state.selectedItem.w_name,
+                    body:"Are you sure you want to delete "+this.state.selectedItem.name,
                     type: "confirmation"
                 }
             });
@@ -122,10 +147,10 @@ class ManageWorker extends Component {
                         <label>Email</label>
                     </div>
                     <div className="col-sm">
-                        <label>Status</label>
+                        <label>Cost per Hour</label>
                     </div>
                     <div className="col-sm">
-                        <label>Operations</label>
+                        <label>Availability per Week</label>
                     </div>
                     <div className="col-sm">
                         <label>Created On</label>
@@ -133,47 +158,45 @@ class ManageWorker extends Component {
                 </div>
                 <div className="quote-req-table">
                     {this.state.listitems.filter(item =>
-                        item.w_name && item.w_name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
+                        item.name && item.name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
 
 
-                            <div className="row mt-1" key={listitem.id}>
+                            <div className="row mt-1" key={listitem.email}>
 
 
                                 <div className="col-sm" >
                                     <label className="btn btn-default blue projectname-truncate text-truncate">
                                         <input type="radio" className="toggle"
-                                            name="quoteItem" value={listitem.id}
+                                            name="quoteItem" value={listitem.email}
                                             onChange={() => this.onWorkerSelected(listitem)} />
-                                        {listitem.w_name}
+                                        {listitem.name}
                                     </label>
 
                                 </div>
 
                                 <div className="col-sm" >
-                                    <label className="description-truncate text-truncate">{listitem.w_phone}</label>
+                                    <label className="description-truncate text-truncate">{listitem.phone}</label>
                                 </div>
 
                                 <div className="col-sm" >
-                                    <label>{listitem.w_address}</label>
+                                    <label>{listitem.address}</label>
                                 </div>
 
                                 <div className="col-sm" >
-                                    <label>{listitem.w_email}</label>
+                                    <label>{listitem.email}</label>
                                 </div>
 
                                 <div className="col-sm" >
-                                    <label>{listitem.w_status}</label>
+                                    <label>{listitem.cost_per_hr}</label>
                                 </div>
 
                                 <div className="operation-div col-sm" >
 
-                                    <label className="operation-text-truncate">{listitem.w_operations}</label>
-                                    <span className="badge badge-light float-right">{listitem.w_operations && listitem.w_operations.length}</span>
-
+                                    <label>{listitem.total_avail_per_week}</label>
                                 </div>
 
                                 <div className="col-sm" >
-                                    <label>{listitem.createdAt}</label>
+                                    <label>{(new Date(listitem.createdAt)).toLocaleDateString()}</label>
                                 </div>
 
                             </div>
@@ -185,7 +208,7 @@ class ManageWorker extends Component {
     render() {
         return (
             <React.Fragment>
-                 <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
+                <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
                 {this.state.editWorkerPage ? <EditWorker selectedItem={this.state.selectedItem} parentCallback={this.parentCallback} /> : this.renderWorkerList()}
             </React.Fragment>
         );

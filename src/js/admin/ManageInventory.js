@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+
+import Popup from "../components/Popup";
+import { validationMessages } from '../common/Constants';
+
 import EditInventory from './EditInventory';
 import AdminService from "../services/admin.service";
 
@@ -7,7 +11,9 @@ class ManageInventory extends Component {
         searchValue: "",
         listitems: [],
         selectedItem: [],
-        editInventoryPage: false
+        editInventoryPage: false,
+        popupConfig: {},
+        isPopupOpen: false
     }
     constructor(props) {
         super(props);
@@ -18,7 +24,7 @@ class ManageInventory extends Component {
             response => {
                 if(response){
                     this.setState({
-                        listitems: response.data.inventory
+                        listitems: response.data.rows
                     });
                 }
             },
@@ -32,10 +38,47 @@ class ManageInventory extends Component {
             searchValue: e.target.value.toLowerCase()
         });
     }
-    editInventory() {
+
+    handleClose = () => {
         this.setState({
-            editInventoryPage: true
+            isPopupOpen: false
         });
+    };
+
+    handleModalYes = () => {
+        this.setState({
+            isPopupOpen: false
+        });
+        AdminService.deleteInventory(this.state.selectedItem.id).then(
+            response => {
+                var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+                this.setState({
+                    listitems: tempList,
+                    selectedItem: []
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
+
+    };
+
+    editInventory() {
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
+        } else {
+            this.setState({
+                editInventoryPage: true
+            });
+        }
     }
     addInventory() {
         this.setState({
@@ -46,10 +89,30 @@ class ManageInventory extends Component {
         });
     }
     deleteInventory() {
-        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+        /* var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
         this.setState({
             listitems: tempList
         });
+        */
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
+        } else {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Confirm to Delete",
+                    body:"Are you sure you want to delete "+this.state.selectedItem.itemName,
+                    type: "confirmation"
+                }
+            });
+        }
     }
     onInventorySelected(selectedItem) {
         this.setState({
@@ -103,8 +166,8 @@ class ManageInventory extends Component {
                     </div>
                 </div>
                 <div className="quote-req-table">
-                {this.state.listitems.filter(item =>
-                        item.item_name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
+                {this.state.listitems && this.state.listitems.filter(item =>
+                        item.itemName.toLowerCase().includes(this.state.searchValue)).map(listitem => (
                     
 
                         <div className="row mt-1" key={listitem.id}>
@@ -115,7 +178,7 @@ class ManageInventory extends Component {
                                     <input type="radio" className="toggle"
                                         name="quoteItem" value={listitem.id}
                                         onChange={() => this.onInventorySelected(listitem)} />
-                                    {listitem.item_name}
+                                    {listitem.itemName}
                                 </label>
                                             
                             </div>
@@ -123,7 +186,7 @@ class ManageInventory extends Component {
 
 
                             <div className="col-sm" >
-                                <label className="description-truncate text-truncate">{listitem.item_desc}</label>
+                                <label className="description-truncate text-truncate">{listitem.itemDesc}</label>
                             </div>
                             <div className="col-sm" >
                                 <label>{listitem.availability}</label>
@@ -157,6 +220,7 @@ class ManageInventory extends Component {
     render() {
         return (
             <React.Fragment>
+                <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
                 {this.state.editInventoryPage ? <EditInventory selectedItem={this.state.selectedItem} parentCallback= {this.parentCallback}/> : this.renderInventoryList()}
             </React.Fragment>
         );

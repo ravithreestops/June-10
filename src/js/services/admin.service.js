@@ -10,7 +10,6 @@ axios.interceptors.request.use(
             config.headers['Authorization'] = 'Bearer ' + user.token;
         }
         config.headers['Content-Type'] = 'application/json';
-        console.log(config);
         return config;
     },
     error => {
@@ -21,7 +20,7 @@ axios.interceptors.response.use((response) => {
     return response
 },
     function (error) {
-        //window.location.href = `/`;
+       // window.location.href = `/`;
         return Promise.reject(error);
     });
 
@@ -72,11 +71,27 @@ class AdminService {
                 console.log(error);
             });
     }
+    changeStatus(quoteId,data) {
+        var config = {
+            method: 'post',
+            url: API_URL + '/quotes/'+quoteId+'/changeStatus',
+            data: data
+        };
 
-    editQuote(quoteId,data) {
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    tagQuote(data) {
+        //https://funetus-api.herokuapp.com/admin/quotes/tagQuotes
         var config = {
             method: 'PUT',
-            url: API_URL + 'quotes/' + quoteId,
+            url: API_URL + 'quotes/tagQuotes',
             data: data
         };
 
@@ -110,10 +125,24 @@ class AdminService {
             url: API_URL + 'workers',
             data: data
         };
-        console.log(config);
+        
         return axios(config)
             .then(function (response) {
-                console.log(response);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    deleteWorker(id) {
+        var config = {
+            method: 'DELETE',
+            url: API_URL + 'workers/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
                 return response;
             })
             .catch(function (error) {
@@ -124,12 +153,25 @@ class AdminService {
     getAllOperations() {
         var config = {
             method: 'get',
-            url: API_URL + 'operations'
+            url: API_URL + 'operation'
         };
 
         return axios(config)
             .then(function (response) {
-                console.log(response);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    deleteOperation(id) {
+        var config = {
+            method: 'DELETE',
+            url: API_URL + 'operation/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
                 return response;
             })
             .catch(function (error) {
@@ -145,7 +187,6 @@ class AdminService {
 
         return axios(config)
             .then(function (response) {
-                console.log(response);
                 return response;
             })
             .catch(function (error) {
@@ -155,13 +196,26 @@ class AdminService {
     createInventory(data) {
         var config = {
             method: 'post',
-            url: API_URL + 'workers',
+            url: API_URL + 'inventory',
             data: data
         };
         console.log(config);
         return axios(config)
             .then(function (response) {
-                console.log(response);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    deleteInventory(id) {
+        var config = {
+            method: 'DELETE',
+            url: API_URL + 'inventory/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
                 return response;
             })
             .catch(function (error) {
@@ -172,12 +226,56 @@ class AdminService {
     getAllProjects() {
         var config = {
             method: 'get',
-            url: API_URL + 'projects'
+            url: API_URL + 'project'
         };
 
         return axios(config)
             .then(function (response) {
-                console.log(response);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    deleteProject(id) {
+        var config = {
+            method: 'DELETE',
+            url: API_URL + 'project/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    
+    getAllCustomers() {
+        var config = {
+            method: 'get',
+            url: API_URL + 'customer'
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    deleteCustomer(id) {
+        var config = {
+            method: 'DELETE',
+            url: API_URL + 'customer/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
                 return response;
             })
             .catch(function (error) {

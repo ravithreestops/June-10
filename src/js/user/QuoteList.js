@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import AdminService from "../services/admin.service";
+import UserService from "../services/user.service";
 
 class QuoteList extends Component {
     constructor(props) {
@@ -24,11 +24,10 @@ class QuoteList extends Component {
     }
 
     getAllQuotes() {
-        AdminService.getAllQuotes().then(
+        UserService.getAllQuotes().then(
             response => {
-                debugger;
                 this.setState({
-                    listitems: response.data.quotes
+                    listitems: response.data.rows
                 });
             },
             error => {
@@ -63,7 +62,7 @@ class QuoteList extends Component {
 
                 <div className="list-group">
 
-                    {this.state.listitems.filter(item =>
+                    {this.state.listitems && this.state.listitems.filter(item =>
                         item.title.toLowerCase().includes(this.state.searchValue)).map(listitem => (
 
                             <a className={

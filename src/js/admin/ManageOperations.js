@@ -1,26 +1,27 @@
 import React, { Component } from 'react';
+import Popup from "../components/Popup";
+import { validationMessages } from '../common/Constants';
 import EditOperations from './EditOperations';
-
 import AdminService from "../services/admin.service";
-
-import OperationJson from '../../data/operationsData.json';
 
 class ManageOperations extends Component {
     state = {
         searchValue: "",
-        listitems: OperationJson.operationsList,
+        listitems: [],
         selectedItem: [],
-        editOperationPage: false
+        editOperationPage: false,
+        popupConfig: {},
+        isPopupOpen: false
     }
-    /*constructor(props) {
+    constructor(props) {
         super(props);
-        //this.getAllOperationList();
-    }*/
+        this.getAllOperationList();
+    }
     getAllOperationList() {
         AdminService.getAllOperations().then(
             response => {
                 this.setState({
-                    listitems: response.data.operations
+                    listitems: response.data.rows
                 });
             },
             error => {
@@ -33,16 +34,65 @@ class ManageOperations extends Component {
             searchValue: e.target.value.toLowerCase()
         });
     }
-    editOperations() {
+    handleClose = () => {
         this.setState({
-            editOperationPage: true
+            isPopupOpen: false
         });
+    };
+
+    handleModalYes = () => {
+        this.setState({
+            isPopupOpen: false
+        });
+        AdminService.deleteOperation(this.state.selectedItem.id).then(
+            response => {
+                var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+                this.setState({
+                    listitems: tempList,
+                    selectedItem: []
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
+    };
+    editOperations() {
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
+        } else {
+            this.setState({
+                editOperationPage: true
+            });
+        }
     }
     deleteOperations() {
-        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
-        this.setState({
-            listitems: tempList
-        });
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
+        } else {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Confirm to Delete",
+                    body:"Are you sure you want to delete "+this.state.selectedItem.name,
+                    type: "confirmation"
+                }
+            });
+        }
     }
     addOperations() {
         this.setState({
@@ -111,8 +161,8 @@ class ManageOperations extends Component {
                         </div>
                         <div className="quote-req-table">
 
-                           {this.state.listitems.filter(item =>
-                                item.o_name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
+                           {this.state.listitems && this.state.listitems.filter(item =>
+                                item.name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
 
                                     <div className="row mt-1" key={listitem.id}>
                                         <div className="col-sm" >
@@ -120,12 +170,12 @@ class ManageOperations extends Component {
                                                 <input type="radio" className="toggle"
                                                     name="operationItem" value={listitem.id}
                                                     onChange={() => this.onOperationSelected(listitem)} />
-                                                {listitem.o_name}
+                                                {listitem.name}
                                             </label>
                                             
                                         </div>
                                         <div className="col-sm" >
-                                            <label className="description-truncate text-truncate">{listitem.o_desc}</label>
+                                            <label className="description-truncate text-truncate">{listitem.desc}</label>
                                         </div>
                                         <div className="col-sm" >
                                             <label>{listitem.createdAt}</label>
@@ -152,6 +202,7 @@ class ManageOperations extends Component {
     render() {
         return (
             <React.Fragment>
+                <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
                 {this.state.editOperationPage ? <EditOperations selectedItem={this.state.selectedItem} parentCallback= {this.parentCallback}/> : this.renderOperationsList()}
             </React.Fragment>
         );

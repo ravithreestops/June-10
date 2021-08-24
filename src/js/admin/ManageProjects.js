@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import Popup from "../components/Popup";
+import { validationMessages } from '../common/Constants';
 import {statusColorClass} from '../common/Utils.js';
 import EditProject from './EditProject';
 
@@ -9,7 +11,9 @@ class ManageProjects extends Component {
         searchValue: "",
         listitems: [],
         selectedItem: [],
-        editProjectPage: false
+        editProjectPage: false,
+        popupConfig: {},
+        isPopupOpen: false
     }
     constructor(props) {
         super(props);
@@ -34,16 +38,70 @@ class ManageProjects extends Component {
             searchValue: e.target.value.toLowerCase()
         });
     }
-    editProjects() {
+    handleClose = () => {
         this.setState({
-            editProjectPage: true
+            isPopupOpen: false
         });
+    };
+
+    handleModalYes = () => {
+        this.setState({
+            isPopupOpen: false
+        });
+        AdminService.deleteProject(this.state.selectedItem.id).then(
+            response => {
+                var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+                this.setState({
+                    listitems: tempList,
+                    selectedItem: []
+                });
+            },
+            error => {
+              console.log("Error");
+            }
+          );
+    };
+    editProjects() {
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
+        } else {
+            this.setState({
+                editProjectPage: true
+            });
+        }
     }
     deleteProjects() {
-        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
+        /*var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
         this.setState({
             listitems: tempList
         });
+        */
+        if (this.state.selectedItem && this.state.selectedItem.length === 0) {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Message",
+                    body:validationMessages.NO_ITEM,
+                    type: "message"
+                }
+            });
+        } else {
+            this.setState({
+                isPopupOpen: true,
+                popupConfig : {
+                    header: "Confirm to Delete",
+                    body:"Are you sure you want to delete "+this.state.selectedItem.name,
+                    type: "confirmation"
+                }
+            });
+        }
     }
     addProjects() {
         this.setState({
@@ -116,7 +174,7 @@ class ManageProjects extends Component {
                         <div className="quote-req-table">
 
                             {this.state.listitems.filter(item =>
-                                item.p_name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
+                                item.name.toLowerCase().includes(this.state.searchValue)).map(listitem => (
 
                                     <div className="row mt-1" key={listitem.id}>
                                         <div className="col-sm" >
@@ -124,12 +182,12 @@ class ManageProjects extends Component {
                                                 <input type="radio" className="toggle"
                                                     name="projectItem" value={listitem.id}
                                                     onChange={() => this.onProjectSelected(listitem)} />
-                                                {listitem.p_name}
+                                                {listitem.name}
                                             </label>
                                             
                                         </div>
                                         <div className="col-sm" >
-                                            <label className="description-truncate text-truncate">{listitem.p_desc}</label>
+                                            <label className="description-truncate text-truncate">{listitem.desc}</label>
                                         </div>
                                         <div className="col-sm" >
                                             <label>{listitem.hours_commited}</label>
@@ -156,6 +214,7 @@ class ManageProjects extends Component {
     render() {
         return (
             <React.Fragment>
+                <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
                 {this.state.editProjectPage ? <EditProject selectedItem={this.state.selectedItem} parentCallback= {this.parentCallback}/> : this.renderProjectList()}
             </React.Fragment>
         );

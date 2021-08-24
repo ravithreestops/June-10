@@ -1,23 +1,49 @@
 import React, { Component } from 'react';
-import ToolsJson from '../../data/inventoryData.json';
-import WorkerJson from '../../data/workerData.json';
 
+import AdminService from "../services/admin.service";
 
 class EditOperations extends Component {
     constructor(props){
         super(props);
         this.state = {
             item: this.props.selectedItem,
-            toolsList: ToolsJson.inventoryList,
-            selectedTools: [],
+            toolsList: [],
             selectedTool: {},
             Required: 0,
-
-            workerList: WorkerJson.rows
+            workerList: [],
+            selectedWorker: {}
         }
+        this.getAllTools();
+        this.getAllWorkers();
         this.Required = this.Required.bind(this);
     }
-    
+
+    getAllTools() {
+        AdminService.getAllInventory().then(
+            response => {
+                this.setState({
+                    toolsList: response.data.rows
+                });
+            },
+            error => {
+                console.log("Error");
+            }
+        );
+    }
+
+    getAllWorkers() {
+        AdminService.getAllWorkers().then(
+            response => {
+                this.setState({
+                    workerList: response.data.rows
+                });
+            },
+            error => {
+                console.log("Error");
+            }
+        );
+    }
+
     Required(event) {
         this.setState({ Required: event.target.value })
     }
@@ -26,16 +52,27 @@ class EditOperations extends Component {
         item[propertyName] = event.target.value;
         this.setState({ item: item });
     }
-    handleInputChange(event) {
-        this.setState({ selectedTool: this.state.toolsList[event.target.value] });
+    handleToolSelection(event) {
+        this.state.selectedTool["Inventories"] = this.state.toolsList.find(o => o.id == event.target.value);
+    }
+    handleWorkerSelection(event) {
+        this.state.selectedWorker["Workers"] = this.state.workerList.find(o => o.id == event.target.value);
     }
 
     addTools(event) {
-        this.state.selectedTool['required'] = this.state.Required;
-        var newListTools = this.state.selectedTools;
-        newListTools.push(this.state.selectedTool);
-        this.setState({ selectedTools: newListTools });
+        
+        this.state.selectedTool.Inventories['required'] = this.state.Required;
+        var selectedOperation = this.state.item;
+        selectedOperation.OperationInventories.push(this.state.selectedTool);
+        this.setState({ item: selectedOperation });
+     
     }
+    addWorker(event) {
+        var selectedOperation = this.state.item;
+        selectedOperation.OperationWorkers.push(this.state.selectedWorker);
+        this.setState({ item: selectedOperation });
+    }
+
     saveOperation() {
         /*console.log(this.state.item);
         if(this.state.item.id != undefined) {
@@ -63,12 +100,12 @@ class EditOperations extends Component {
                         <div className="col-4">
 
                             <nav aria-label="breadcrumb">
-                                <ul class="breadcrumb">
-                                    <li class="breadcrumb-item" onClick={this.handleBreadCrumb.bind(this)}>
+                                <ul className="breadcrumb">
+                                    <li className="breadcrumb-item" onClick={this.handleBreadCrumb.bind(this)}>
                                         <span className="mb-1 underline">Manage</span>
                                         <span className="mb-1 blue-color pl-2">Operation</span>
                                     </li>
-                                    <li class="breadcrumb-item active" aria-current="page">
+                                    <li className="breadcrumb-item active" aria-current="page">
                                         <span className="mb-1">{(this.state.item.length !== 0) ? 'Edit' : 'Add'}</span>
                                         <span className="mb-1 blue-color pl-2">Operation</span>
                                     </li>
@@ -87,14 +124,14 @@ class EditOperations extends Component {
                             <div>
                                 <span>Operation Name</span>
                                 <input type="text"
-                                    className="form-control" defaultValue={this.state.item.o_name}
-                                    onChange={this.handleChange.bind(this, 'o_name')} />
+                                    className="form-control" defaultValue={this.state.item.name}
+                                    onChange={this.handleChange.bind(this, 'name')} />
                             </div>
                             <div>
                                 <span>Description</span>
                                 <textarea className="form-control" rows="3"
-                                    defaultValue={this.state.item.o_desc}
-                                    onChange={this.handleChange.bind(this, 'o_desc')}></textarea>
+                                    defaultValue={this.state.item.desc}
+                                    onChange={this.handleChange.bind(this, 'desc')}></textarea>
                             </div>
 
                             <div>
@@ -105,10 +142,10 @@ class EditOperations extends Component {
                                 
                                 <div className="row">
                                     <div className="col">
-                                        <select className="form-control" name="city" onChange={this.handleInputChange.bind(this)}>
+                                        <select className="form-control" onChange={this.handleToolSelection.bind(this)}>
                                             <option selected>Select Tools</option>
-                                            {this.state.toolsList.map((toolItem,index) => (
-                                                <option key={toolItem.id} value={index}>{toolItem.item_name}</option>
+                                            {this.state.toolsList.map((toolItem) => (
+                                                <option key={toolItem.id} value={toolItem.id}>{toolItem.itemName}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -121,7 +158,7 @@ class EditOperations extends Component {
                             </div>
 
 
-                            <div className="row mt-1 quote-req-header">
+                            <div className="row mt-1 quote-req-header font-weight-bold">
                                 <div className="col-sm">
                                     <label>Tool/Material Name</label>
                                 </div>
@@ -132,17 +169,17 @@ class EditOperations extends Component {
                                     <label>Availability</label>
                                 </div>
                             </div>
-                            {this.state.selectedTools && this.state.selectedTools.map(listitem => (
+                            {this.state.item.OperationInventories && this.state.item.OperationInventories.map(listitem => (
 
-                                <div className="row mt-1" key={listitem.id}>
+                                <div className="row mt-1" key={listitem.Inventories.id}>
                                     <div className="col-sm" >
-                                        <label className="description-truncate text-truncate">{listitem.item_name}</label>
+                                        <label className="description-truncate text-truncate">{listitem.Inventories.itemName}</label>
                                     </div>
                                     <div className="col-sm" >
-                                        <label>{listitem.required}</label>
+                                        <label>{listitem.Inventories.required}</label>
                                     </div>
                                     <div className="col-sm" >
-                                        <label>{listitem.availability}</label>
+                                        <label>{listitem.Inventories.availability}</label>
                                     </div>
                                 </div>
                             ))}
@@ -156,15 +193,27 @@ class EditOperations extends Component {
 
 
                         <div className="col">
-                            <div>
-                                <span>Workers</span>
-                                <input type="text"
-                                    className="form-control" defaultValue={this.state.item.worker}
-                                    onChange={this.handleChange.bind(this, 'worker')} />
-                            </div>
+                            
+
+                            <div className="row">
+                                    <div className="col">
+                                    <select className="form-control" onChange={this.handleWorkerSelection.bind(this)}>
+                                            <option selected>Select Worker</option>
+                                            {this.state.workerList.map((item) => (
+                                                <option key={item.id} value={item.id}>{item.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="col"> 
+                                        <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4 d-inline" onClick={this.addWorker.bind(this)}>Add</button>
+                                    </div>
+                                </div>
 
 
-                            <div className="row mt-1 quote-req-header">
+
+
+                            {this.state.item.OperationWorkers && 
+                            <div className="row mt-1 quote-req-header font-weight-bold">
                                 <div className="col-sm">
                                     <label>Worker Profession</label>
                                 </div>
@@ -181,26 +230,28 @@ class EditOperations extends Component {
                                     <label>Cost</label>
                                 </div>
                             </div>
+                        }
 
-                            {this.state.workerList && this.state.workerList.map(listitem => (
+                            { this.state.item.OperationWorkers && this.state.item.OperationWorkers.map(listitem => (
 
-                                <div className="row mt-1" key={listitem.id}>
+                                <div className="row mt-1" >
                                     <div className="col-sm" >
-                                        <label className="description-truncate text-truncate">{listitem.w_name}</label>
+                                        <label className="description-truncate text-truncate">{listitem.Workers && listitem.Workers.name}</label>
                                     </div>
                                     <div className="col-sm" >
-                                        <label>{listitem.required}</label>
+                                        <label>{}</label>
                                     </div>
                                     <div className="col-sm" >
-                                        <label>{listitem.availability}</label>
+                                        <label>{}</label>
                                     </div>
                                     <div className="col-sm" >
-                                        <label>{listitem.availbilty_per_day}</label>
+                                        <label>{}</label>
                                     </div>
                                     <div className="col-sm" >
-                                        <label>{listitem.cost_per_day}</label>
+                                        <label></label>
                                     </div>
                                 </div>
+    
                                 ))}
 
 

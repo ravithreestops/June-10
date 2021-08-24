@@ -1,126 +1,51 @@
-import React, { useState } from "react";
+import React, { Component } from 'react';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import UserService from "../services/user.service";
 
+const today = new Date();
+class UserQuote extends Component {
 
-var rowIndex = 0;
-function Quote() {
-    const inputList = [{
-        "name": "Item Name",
-        "type": "text",
-        "value": ""
-    }, {
-        "name": "Unit",
-        "type": "text",
-        "value": ""
-    },
-    {
-        "name": "Quantity ",
-        "type": "text",
-        "value": ""
-    }
-    ];
-    const newInputList = [{
-        "name": "Item Name",
-        "type": "text",
-        "value": ""
-    }, {
-        "name": "Unit",
-        "type": "text",
-        "value": ""
-    },
-    {
-        "name": "Quantity ",
-        "type": "text",
-        "value": ""
-    }
-    ];
-    const [formInputList, setFormInputList] = useState([{
-        "data0": inputList
-    }]);
-
-    // handle input change
-    const handleInputChange = (e, index, j) => {
-        const list = [...formInputList];
-        list.map((item) => {
-
-            if (item[index]) {
-                item[index][j].value = e.target.value;
-                setFormInputList(list);                
-            }
-        })
-    };
-
-    const handleFormChange = (event) => {
-        //var name = event.target.name;
-        //var value = event.target.value;
-
-        //this.setState({ name: value })
-        
-    };
-
-    // handle click event of the Remove button
-    const handleRemoveClick = index => {
-        var removeIndex;
-        const removeList = [...formInputList];
-        removeList.map((item, k) => {
-
-            if (item[index]) {
-                removeIndex = k;
-            }
-        })
-        const list = [...formInputList];
-        list.splice(removeIndex, 1);
-        setFormInputList(list);
-    };
-
-    // handle click event of the Add button
-    const handleAddClick = () => {
-        rowIndex = rowIndex + 1;
-        const rowKey = "data" + rowIndex;
-        
-        const newFormInputList = {
-            [rowKey]: newInputList
+    constructor(props) {
+        super(props);
+        this.state = {
+            item: {},
+            measuresObjId: 1
         }
-        setFormInputList([...formInputList, newFormInputList]);
-    };
+        this.state.item['measures']= [
+            {
+                "id": this.state.measuresObjId,
+                "name": "",
+                "unit": "",
+                "qty": ""
+            }
+        ];
+    }
 
-    const renderFormRowHeader = () => {
-        if(formInputList[0]) {
-            const headerObj = formInputList[0][Object.keys(formInputList[0])];
-        return (
-            <div className="row mt-1">
-                {headerObj.map((item) => {
-                    return (
-                        <div className="col-sm">
-                            <label>{item.name}</label>
-                        </div>
-                    )
+    resetQuote() {
+        this.setState({ 
+            item: {},
+            measuresObjId: 1
+         });
+         var obj = this.state.item;
+         obj['measures']= [];
+        this.setState({item:obj});
+    }
 
-                })}
-            <div className="col-sm">
-                <label></label>
-            </div>
-            </div>
-        )
-        }
-        
-    };
-    const cancelQuote = () => { 
-        
-      };
-      const sendQuoteReq = () => {
-        console.log(formInputList);
-        /*
+    sendQuoteReq() {
+
+        let newMeasuresArray = this.state.item.measures.map(function(item) { 
+            delete item.id; 
+            return item; 
+        });
+
         var data = {
-            "title": "quote2222234",
-            "desc": "is simply dummy text of the printing and typesetti",
-            "status" : "ACCEPTED",
-            "measures": [
-                {
-                    "name": "qq",
-                    "unit": "1",
-                    "qty": "12"
-                }
-            ],
+            "title": this.state.item.title,
+            "desc": this.state.item.desc,
+            "status": "NEW",
+            "startDate": this.state.item.startDate,
+            "endDate": this.state.item.endDate,
+            "measures": newMeasuresArray,
             "uploads": [
                 {
                     "fileName": "haaaajkdfjkldsajfdsfdslk",
@@ -131,99 +56,176 @@ function Quote() {
 
         UserService.createQuote(data).then(
             response => {
-                console.log(response);
+                this.props.parentCreateCallBack(response.data);
             },
             error => {
                 console.log("Error");
             }
-        ); */
-      };
+        );
 
-    const renderFormRow = (x) => {
-        return Object.keys(x).filter((obj) => Object.keys(x).indexOf(obj) === 0).map(obj => {
-            return (
+    }
 
-                <div className="row mt-1" key={obj}>
+    handleFormChange(propertyName, event) {
+        var item = this.state.item;
+        item[propertyName] = event.target.value;
+        this.setState({ item: item });
+    }
+    handleDateChange(propertyName, event) {
+        var item = this.state.item;
+        item[propertyName] = new Date(event);
+        this.setState({ item: item });
+    }
+    handleMeasureChange(id,propertyName,event){
+        var tmpObj  = this.state.item;
+        tmpObj.measures.find(o => o.id == id)[propertyName] = event.target.value;
+        this.setState({item: tmpObj});
+    }
 
-                    {x[obj].map((dataItem, j) => {
-                        return (
-                            <div className="col-sm">
-                                <input
-                                    className="form-control"
-                                    name={dataItem.name}
-                                    value={dataItem.value}
-                                    onChange={e => handleInputChange(e, obj, j)}
-                                />
-                            </div>
+    addMeasuresClick() {
+        let tmpObj = this.state.item;
+        let tmpId = this.state.measuresObjId + 1;
+        this.setState({measuresObjId: tmpId});
 
-                        )
-                    }
-                    )}
+        let measuresObj = {
+            "id": tmpId,
+            "name": "",
+            "unit": "",
+            "qty": ""
+        };
+        tmpObj.measures = [...tmpObj.measures, measuresObj];
+        this.setState({item: tmpObj});
+    }
+    handleRemoveClick(id,event) {
+        var tmpObj  = this.state.item;
+        tmpObj.measures = this.state.item.measures.filter(o => o.id != id);
+        this.setState({item: tmpObj});   
+    }
 
-                    <div className="col-sm">
-                        <div className="btn-box">
-                            <button
-                                className="btn btn-primary btn-sm pr-4 pl-4"
-                                onClick={() => handleRemoveClick(obj)}>Remove</button>
 
+    render() {
+        return (
+            <div className="app flex-row align-items-center">
+                <div className="list-group-header section-header row">
+                    <div className="col">
+                        <span className="mb-1 underline">Send New </span>
+                        <span className="mb-1 blue-color pl-2">Quote Request</span>
+                    </div>
+                    <div className="col text-right">
+                        <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.resetQuote()} >Reset</button>
+                        <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.sendQuoteReq()}>Send</button>
+                    </div>
+                </div>
+                <div className="blue-box-div" id="create-quote-form">
+
+                    <div className="form-group">
+                        <label htmlFor="title">Title</label>
+                        <input type="text" className="form-control" id="title"
+                            name="title"
+                            defaultValue={this.state.item.title}
+                            onChange={this.handleFormChange.bind(this, 'title')}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="description">Description</label>
+                        <textarea className="form-control" id="description" rows="3"
+
+                            defaultValue={this.state.item.desc && this.state.item.desc}
+                            onChange={this.handleFormChange.bind(this, 'desc')}
+
+                        ></textarea>
+                    </div>
+
+                    <div className="form-group row">
+                        <div className="col">
+                            <label >Start Date</label>
+                            <DatePicker
+                                selected={this.state.item.startDate && this.state.item.startDate}
+                                onChange={this.handleDateChange.bind(this, 'startDate')}
+                                className="form-control"
+                                minDate={today}
+                            />
+                        </div>
+                        <div className="col">
+                            <label >End Date</label>
+                            <DatePicker
+                                selected={this.state.item.endDate && this.state.item.endDate}
+                                onChange={this.handleDateChange.bind(this, 'endDate')}
+                                className="form-control"
+                                minDate={this.state.item.startDate}
+                            />
                         </div>
                     </div>
 
+                    <div className="form-group">
+                        <label>Measurements</label>
+                        <button className="btn add-btn" onClick={() => this.addMeasuresClick()}></button>
+                       
+                        {this.state.item.measures.length > 0 && 
+                        <div className="row">
+                            <div className="col">
+                                <label>Name</label>
+                            </div>
+                            <div className="col">
+                            <label>Unit</label>
+                            </div>
+                            <div className="col">
+                            <label>Quantity</label>
+                            </div>
+                            <div className="col">
+                            <label></label>
+                            </div>
+                        </div>
+                        }
+
+                        {this.state.item.measures && this.state.item.measures.map((item) => {
+                            return(
+                            <div className="row pb-2" key={item.id}>
+                               <div className="col">
+                                <input type="text" className="form-control"
+                                        defaultValue={item.name}
+                                        onChange={this.handleMeasureChange.bind(this, item.id, 'name')}
+                                    />
+                               </div>
+                               <div className="col">
+                                
+                                    <input type="text" className="form-control"
+                                        defaultValue={item.unit}
+                                        onChange={this.handleMeasureChange.bind(this, item.id, 'unit')}
+                                    />
+                               </div>
+                               <div className="col">
+                                
+                                    <input type="text" className="form-control"
+                                        defaultValue={item.qty}
+                                        onChange={this.handleMeasureChange.bind(this, item.id, 'qty')}
+                                    />
+                               </div>
+                               <div className="col">
+                               <button
+                                className="btn measure-delete-btn "
+                                onClick={this.handleRemoveClick.bind(this,item.id)}></button>
+                               </div>
+                            </div>
+                            )
+
+                        })
+
+                        }
+                    </div>
+
+                    <div>
+                        <label>Attachments</label>
+                        <label className="btn btn-blue btn-sm pr-4 pl-4 ml-2">
+                            Browse <input type="file" hidden />
+                        </label>
+                    </div>
                 </div>
 
-            )
-        })
-    };
 
-    return (
-        <div className="app flex-row align-items-center">
-            <div className="list-group-header section-header row">
-                <div className="col">
-                    <span className="mb-1 underline">Send New </span>
-                    <span className="mb-1 blue-color pl-2">Quote Request</span>
-                </div>
-                <div className="col text-right">
-                    <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => cancelQuote()} >Reset</button>
-                    <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick= {() => sendQuoteReq()}>Send</button>
-                </div>
+
             </div>
-            <div className="blue-box-div" id="create-quote-form">
-
-                <div className="form-group">
-                    <label htmlFor="title">Title</label>
-                    <input type="text" className="form-control" id="title" 
-                    name="title"
-                    onChange={e => handleFormChange(e)}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="description">Description</label>
-                    <textarea className="form-control" id="description" rows="3"></textarea>
-                </div>
-
-
-                <div className="form-group">
-                    <label>Measurements</label>
-                    <button className="btn add-btn " onClick={handleAddClick}></button>
-                    {renderFormRowHeader()}
-                    {formInputList.map((x, i) => {
-                        return (renderFormRow(x, i));
-                    })}
-                </div>
-
-                <div>
-                    <label>Attachments</label>
-                    <label className="btn btn-blue btn-sm pr-4 pl-4 ml-2">
-                        Browse <input type="file" hidden />
-                    </label>
-                </div>
-            </div>
-
-
-
-        </div>
-    );
+        );
+    }
 }
-
-export default Quote;
+export default UserQuote;

@@ -23,10 +23,10 @@ class EditWorker extends Component {
     createWorker() {
         console.log(this.state.item);
         var data = {
-            "name": this.state.item.w_name,
-            "phone": this.state.item.w_phone,
-            "address" : this.state.item.w_address,
-            "email": this.state.item.w_email,
+            "name": this.state.item.name,
+            "phone": this.state.item.phone,
+            "address" : this.state.item.address,
+            "email": this.state.item.email,
             "avail_per_day": this.state.item.avail_per_day,
             "cost_per_hr" : this.state.item.cost_per_hr,
             "total_avail_per_week": this.state.item.total_avail_per_week,
@@ -82,27 +82,27 @@ class EditWorker extends Component {
                             <div>
                                 <span>Worker Name</span>
                                 <input type="text"
-                                    className="form-control" defaultValue={this.state.item.w_name}
-                                    onChange={this.handleChange.bind(this, 'w_name')} />
+                                    className="form-control" defaultValue={this.state.item.name}
+                                    onChange={this.handleChange.bind(this, 'name')} />
                             </div>
                             <div>
                                 <span>Phone</span>
                                 <input type="text"
-                                    className="form-control" defaultValue={this.state.item.w_phone}
-                                    onChange={this.handleChange.bind(this, 'w_phone')} />
+                                    className="form-control" defaultValue={this.state.item.phone}
+                                    onChange={this.handleChange.bind(this, 'phone')} />
                             </div>
                             <div>
                                 <span>Address</span>
                                 <textarea className="form-control" rows="3"
-                                    defaultValue={this.state.item.w_address}
-                                    onChange={this.handleChange.bind(this, 'w_address')}></textarea>
+                                    defaultValue={this.state.item.address}
+                                    onChange={this.handleChange.bind(this, 'address')}></textarea>
                             
                             </div>
                             <div>
                                 <span>Email</span>
                                 <input type="text"
-                                    className="form-control" defaultValue={this.state.item.w_email}
-                                    onChange={this.handleChange.bind(this, 'w_email')} />
+                                    className="form-control" defaultValue={this.state.item.email}
+                                    onChange={this.handleChange.bind(this, 'email')} />
                             </div>
                             <div>
                                 <span>Available per Day</span>

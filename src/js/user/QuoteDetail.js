@@ -1,16 +1,44 @@
 import React, { Component } from 'react';
+import S3 from 'react-aws-s3';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
+const today = new Date();
 class QuoteDetail extends Component {
-
+    state = {
+        formInputList: this.props.dataFromParent.Measures,
+        selectedItem: this.props.dataFromParent,
+        measuresObjId: this.props.dataFromParent.Measures.length
+    }
     constructor(props) {
         super(props);
-        this.state = {
-            formInputList: this.props.dataFromParent.Measures,
-            selectedItem: this.props.dataFromParent
-        };
+        let newMeasuresArray = this.state.selectedItem.Measures && this.state.selectedItem.Measures.map(function(item,index) { 
+            item.id = index+1;
+            return item; 
+        });
+        let newObj = this.state.selectedItem;
+        newObj.Measures = newMeasuresArray;
+        this.setState({
+            selectedItem: newObj
+        })
+    }
+    handleFormChange(propertyName, event) {
+        var item = this.state.selectedItem;
+        item[propertyName] = event.target.value;
+        this.setState({ selectedItem: item });
     }
 
+    handleDateChange(propertyName, event) {
+        var item = this.state.selectedItem;
+        item[propertyName] = new Date(event);
+        this.setState({ selectedItem: item });
+    }
 
+    handleMeasureChange(id, propertyName, event) {
+        var tmpObj  = this.state.selectedItem;
+        tmpObj.Measures.find(o => o.id == id)[propertyName] = event.target.value;
+        this.setState({selectedItem: tmpObj});
+    }
 
     newQuote() {
         this.props.parentCallback();
@@ -19,210 +47,171 @@ class QuoteDetail extends Component {
         this.props.parentEditCallBack();
     }
     saveQuote() {
-
+        console.log(this.state);
     }
 
+    addMeasuresClick() {
+        let tmpObj = this.state.selectedItem;
+        let tmpId = this.state.measuresObjId + 1;
+        this.setState({measuresObjId: tmpId});
 
-
-
-
-    handleAddClick() {
-        alert("Clicked");
-        debugger;
-        var newKey = 0;
-        var formInputList = this.state.formInputList, tmpObj = {};
-
-        Object.keys(formInputList[0]).map(function(x,i){
-            tmpObj[x] = '';
-        });
-
-        const list = [...this.state.formInputList];
-        list.push(tmpObj);
-        this.props.dataFromParent.Measures = list;
-        this.setState({
-            formInputList: this.props.dataFromParent.Measures
-        });
-        debugger;
-
-        /*var rowKey = "data" + newKey;
-        var newInputList = [{
-            "name": "Item Name",
-            "type": "text",
-            "value": ""
-        }, {
-            "name": "Unit",
-            "type": "text",
-            "value": ""
-        },
-        {
-            "name": "Quantity ",
-            "type": "text",
-            "value": ""
-        }
-        ];
-
-        var newFormInputObj = {
-            [rowKey]: newInputList
-        }
-
-        const list = [...this.state.formInputList];
-        list.push(newFormInputObj);
-        this.setState({
-            formInputList: list
-        });*/
-    }
-    handleInputChange = (e) => {
-
-    }
-    handleRemoveClick = (index) => {
-
-        /*var removeIndex;
-        const removeList = [...this.state.formInputList];
-        removeList.map((item, k) => {
-
-            if (item[index]) {
-                removeIndex = k;
-            }
-        })
-        const list = [...this.state.formInputList];
-        list.splice(removeIndex, 1);
-        //setFormInputList(list);
-        this.setState({
-            formInputList: list
-        });*/
-
+        let measuresObj = {
+            "id": tmpId,
+            "name": "",
+            "unit": "",
+            "qty": ""
+        };
+        tmpObj.Measures = [...tmpObj.Measures, measuresObj];
+        this.setState({selectedItem: tmpObj});
     }
     
-    renderFormRow = (item, i) => {
-        debugger;
-        console.log(this.state.formInputList);
-        const headerObj = Object.keys(this.props.dataFromParent.Measures[0]);
-        if (item) {
-            return (
-                <div className="row mt-1">
-                    {headerObj && headerObj.map((headerKey) => {
-                        return (
-                            <div className="col-sm">
+    handleRemoveClick(id, event) {
+        var tmpObj  = this.state.selectedItem;
+        tmpObj.Measures = this.state.selectedItem.Measures.filter(o => o.id != id);
+        this.setState({selectedItem: tmpObj}); 
+    }
+    renderMeasurementsDetailSection(measures) {
 
-                                <input
-                                    className="form-control"
-                                    defaultValue={item[headerKey]}
-                                    onChange={e => this.handleInputChange(e)}
-                                />
-
-                            </div>
-                        )
-                    })}
-                    <div className="col-sm">
-                        <div className="btn-box">
-                            <button
-                                className="btn btn-primary btn-sm pr-4 pl-4"
-                                onClick={() => this.handleRemoveClick()}>Remove</button>
-
-                        </div>
+        return (<div className="form-group">
+            <label>Measurements</label>
+            {measures.length > 0 &&
+                <div className="row">
+                    <div className="col">
+                        <label>Name</label>
                     </div>
-
+                    <div className="col">
+                        <label>Unit</label>
+                    </div>
+                    <div className="col">
+                        <label>Quantity</label>
+                    </div>
                 </div>
+            }
+
+            {measures && measures.map((item,index) => {
+                return (
+                    <div className="row pb-2" key={item.id}>
+                        <div className="col">
+                            <label>{item.name}</label>
+                        </div>
+                        <div className="col">
+                            <label>{item.unit}</label>
+                        </div>
+                        <div className="col">
+                            <label>{item.qty}</label>
+                        </div>
+                        
+                    </div>
                 )
-        }
+            })
 
+            }
+        </div>);
+    }
+    renderMeasurementsSection(measures) {
 
-        /*
-        return Object.keys(x).filter((obj) => Object.keys(x).indexOf(obj) === 0).map(obj => {
-            return (
+        return (<div className="form-group">
+            <label>Measurements</label>
+            <button className="btn add-btn" onClick={() => this.addMeasuresClick()}></button>
 
-                <div className="row mt-1" key={obj}>
+            {measures.length > 0 &&
+                <div className="row">
+                    <div className="col">
+                        <label>Name</label>
+                    </div>
+                    <div className="col">
+                        <label>Unit</label>
+                    </div>
+                    <div className="col">
+                        <label>Quantity</label>
+                    </div>
+                    <div className="col">
+                        <label></label>
+                    </div>
+                </div>
+            }
 
-                    {x[obj].map((dataItem, j) => {
-                        return (
-                            <div className="col-sm">
-                                <input
-                                    className="form-control"
-                                    name={dataItem.name}
-                                    defaultValue={dataItem.value}
-                                    onChange={e => this.handleInputChange(e, obj, j)}
-                                />
-                            </div>
+            {measures && measures.map((item,index) => {
+                return (
+                    <div className="row pb-2" key={item.id}>
+                        <div className="col">
+                            <input type="text" className="form-control"
+                                defaultValue={item.name}
+                                onChange={this.handleMeasureChange.bind(this, item.id, 'name')}
+                            />
+                        </div>
+                        <div className="col">
 
-                        )
-                    }
-                    )}
+                            <input type="text" className="form-control"
+                                defaultValue={item.unit}
+                                onChange={this.handleMeasureChange.bind(this, item.id, 'unit')}
+                            />
+                        </div>
+                        <div className="col">
 
-                    <div className="col-sm">
-                        <div className="btn-box">
+                            <input type="text" className="form-control"
+                                defaultValue={item.qty}
+                                onChange={this.handleMeasureChange.bind(this, item.id, 'qty')}
+                            />
+                        </div>
+                        <div className="col">
                             <button
-                                className="btn btn-primary btn-sm pr-4 pl-4"
-                                onClick={() => this.handleRemoveClick(obj)}>Remove</button>
-
+                                className="btn measure-delete-btn "
+                                onClick={this.handleRemoveClick.bind(this, item.id)}></button>
                         </div>
                     </div>
+                )
 
-                </div>
+            })
 
-            )
-        })
-*/
-
+            }
+        </div>);
     }
 
     renderEditQuote() {
-
-        /*
-         <div className="form-group">
-                        <label>Measurements</label>
-                        <button className="btn add-btn " onClick={() => this.handleAddClick()}></button>
-
-
-                        {this.renderFormRowHeader()}
-                        {this.state.formInputList && this.state.formInputList.map((x, i) => {
-                            return (this.renderFormRow(x, i));
-                        })}
-
-                    </div>
-
-                    <div className="form-group">
-                        <label>Attachments</label>
-                        <label className="btn btn-blue btn-sm pr-4 pl-4 ml-2">
-                            Browse <input type="file" hidden />
-                        </label>
-
-                        <div className="col-3 attachment-icon">
-                            <small>{selectedQuote.Uploads.length}</small>
-                            <small>Attachments</small>
-                        </div>
-
-                    </div>
-                     */
         var selectedQuote = this.props.dataFromParent;
-        
         if (selectedQuote) {
-
             return (
                 <div className="blue-box-div">
 
                     <div className="form-group">
                         <label htmlFor="title">Title</label>
-                        <input type="text" className="form-control" id="title" defaultValue={selectedQuote.title} />
+                        <input type="text" className="form-control" id="title" 
+                        defaultValue={selectedQuote.title}
+                        onChange={this.handleFormChange.bind(this, 'title')}
+                        />
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="description">Description</label>
-                        <textarea defaultValue={selectedQuote.desc} className="form-control" id="description" rows="3"></textarea>
+                        <textarea className="form-control" id="description" rows="3"
+                        defaultValue={selectedQuote.desc}
+                        onChange={this.handleFormChange.bind(this, 'desc')}
+                        ></textarea>
                     </div>
 
-                    <div className="form-group">
-                        <label>Measurements</label>
-                        <button className="btn add-btn " onClick={() => this.handleAddClick()}></button>
-
-
-                        {this.renderMeasurementHeader()}
-                        {this.props.dataFromParent.Measures && this.props.dataFromParent.Measures.map((x, i) => {
-                        return (this.renderFormRow(x, i));
-                        })}
-
-                        
-
+                    <div className="form-group row">
+                        <div className="col">
+                            <label >Start Date</label>
+                            <DatePicker
+                                selected={new Date(selectedQuote.startDate)}
+                                onChange={this.handleDateChange.bind(this, 'startDate')}
+                                className="form-control"
+                                minDate={today}
+                            />
+                        </div>
+                        <div className="col">
+                            <label >End Date</label>
+                            <DatePicker
+                                selected={new Date(selectedQuote.endDate)}
+                                onChange={this.handleDateChange.bind(this, 'endDate')}
+                                className="form-control"
+                                minDate={new Date(selectedQuote.startDate)}
+                            />
+                        </div>
                     </div>
+
+                    {this.renderMeasurementsSection(selectedQuote.Measures)}
 
                     <div className="form-group">
                         <label>Attachments</label>
@@ -231,69 +220,91 @@ class QuoteDetail extends Component {
                         </label>
 
                         <div className="col-3 attachment-icon">
-                            <small>{selectedQuote.Uploads.length}</small>
+                            <small>{selectedQuote.Uploads && selectedQuote.Uploads.length}</small>
                             <small>Attachments</small>
                         </div>
 
                     </div>
-
-
-
-
                 </div>
             )
         }
     }
-
-
-
-
-
-    renderMeasurementHeader() {
-
-        var formInputList = this.props.dataFromParent.Measures;
-        if (formInputList) {
-            if (formInputList[0]) {
-                const headerObj = Object.keys(formInputList[0]);
-                return (
-                    <div className="row mt-1">
-                        {headerObj && headerObj.map((item) => {
-                            return (
-                                <div className="col-sm">
-                                    <span className="font-weight-bold">{item}</span>
-                                </div>
-                            )
-                        })}
-                    </div>
-                )
+    handleFileInput(e) {
+        const file = e.target.files[0];
+        if(file) {
+            const config = {
+                bucketName: 'fuentes-fileupload',
+                dirName: 'purchase-order',
+                region: 'us-west-1',
+                accessKeyId: 'AKIA5ARA5MYMNVC47U6F',
+                secretAccessKey: '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'
             }
-        }
+            const ReactS3Client = new S3(config);
+            const newFileName = 'test-file';
+    
+            ReactS3Client
+                .uploadFile(file, newFileName)
+                .then(data => console.log(data))
+                .catch(err => console.error(err))
+        }   
     }
-
-    renderMeasurements(item, i) {
-
-        const headerObj = Object.keys(this.props.dataFromParent.Measures[0]);
-        if (item) {
-            return (
-                <div className="row mt-1">
-                    {headerObj && headerObj.map((headerKey) => {
-                        return (
-                            <div className="col-sm">
-                                <span >{item[headerKey]}</span>
-                            </div>
-                        )
-                    })}
-                </div>
-            )
-        }
-
-    }
+    
 
     renderQuoteDetails() {
-
         if (this.props.dataFromParent) {
             return (
                 <div className="blue-box-div">
+                    <div>
+                        <span className="underline blue">Title</span>
+                        <p>{this.props.dataFromParent.title}</p>
+                    </div>
+                    <div>
+                        <span className="underline blue">Description</span>
+                        <p>{this.props.dataFromParent.desc}</p>
+                    </div>
+                    
+                    <div className="row">
+                        <div className="col-4">
+                            <span className="underline blue">Tentitive Start Date</span>
+                            <p>{(new Date(this.props.dataFromParent.startDate)).toLocaleDateString()}</p>
+                        </div>
+                        <div className="col">
+                            <span className="underline blue">Tentitive End Date</span>
+                            <p>{(new Date(this.props.dataFromParent.endDate)).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span className="underline blue">Inspection</span>
+                        <p>{this.props.dataFromParent.inspection}</p>
+                    </div>
+
+                    <div>
+                        <span className="underline blue">Total Cost</span>
+                        <p>9897</p>
+                    </div>
+
+                    <div className="row">
+                        <div className="col-4">
+                            <span className="underline blue mb-2">Submitted On</span>
+                            <p>{(new Date(this.props.dataFromParent.createdAt)).toLocaleDateString()}</p>
+                        </div>
+                        <div className="col">
+                            <span className="underline blue mb-2">Status</span>
+                            <p> {this.props.dataFromParent.status}
+                                
+                            { this.props.dataFromParent.status=="QUOTE_RECEIVED" &&
+                                <label className="btn btn-green btn-sm pr-4 pl-4 ml-2">
+                                    Submit P O <input type="file" hidden onChange={this.handleFileInput.bind(this)} />
+                                </label>
+                            }
+                       
+                            </p>
+                        </div>
+                    </div>
+                    {this.renderMeasurementsDetailSection(this.props.dataFromParent.Measures)}
+                </div>
+                /*<div className="blue-box-div">
                     <div>
                         <span className="underline blue">Title</span>
                         <p>{this.props.dataFromParent.title}</p>
@@ -339,8 +350,9 @@ class QuoteDetail extends Component {
                         </div>
 
                     </div>
-                </div>
-            )
+                </div>*/
+
+            );
         }
     }
     render() {
@@ -375,3 +387,7 @@ class QuoteDetail extends Component {
     }
 }
 export default QuoteDetail;
+
+
+
+

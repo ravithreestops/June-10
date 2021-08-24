@@ -2,46 +2,59 @@
     "operationsList": [
         {
           "id": 0,
-          "operationName": "Operation1",
+          "name": "Operation1",
+          "desc": "Operation1111",
           "hours": 230,
-          "workers": 3,
           "inspection": "Standard",
           "cost": 200,
+          "workers": [
+            {
+              "id": "1",
+              "name": "Worker1"
+            }
+          ],
           "tools": [
             {
               "id": "tool1",
-              "item_name": "Tool1",
+              "itemName": "Tool1",
               "unit": "cm",
               "availability": 2,
               "cost": 10
             },
             {
               "id": "tool2",
-              "item_name": "Tool2",
+              "itemName": "Tool2",
               "unit": "inch",
               "availability": 20,
               "cost": 50
             }
           ]
+          
         },
         {
           "id": 1,
-          "operationName": "Op2",
+          "name": "Operation2",
+          "desc": "Operation222",
           "hours": 20,
-          "workers": 10,
           "inspection": "Standard",
           "cost": 230,
+          "workers": [
+            {
+              "id": "1",
+              "name": "Worker1"
+            }
+          ],
           "tools": [
             {
               "id": "tool1",
-              "item_name": "Tool1",
+              "itemName": "Tool1",
               "unit": "cm",
               "availability": 2,
               "cost": 10
             },
             {
               "id": "tool2",
-              "item_name": "Tool2",
+              "itemName": "Tool2",
               "unit": "inch",
               "availability": 20,
               "cost": 50

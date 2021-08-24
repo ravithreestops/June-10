@@ -10,7 +10,7 @@ export const validationMessages = {
     DELETE_CONFIRM: "Are you sure you want to delete "
 };
 export const usersTag = {
-    ADMIN_TAG: 5,
-    USER_TAG: 15,
+    ADMIN_TAG: 6,
+    USER_TAG: 2,
     WORKER_TAG: 10
 }

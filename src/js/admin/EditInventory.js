@@ -23,34 +23,14 @@ class EditInventory extends Component {
         this.props.parentCallback();
     }
     createInventory() {
-        /**
-         {
-    "__comment": "Operations is not mandatory , you can tag operations later",
-    "itemName": "Screw",
-    "itemDesc": "Description For Screw",
-    "availability": 250,
-    "cost": 10,
-    "supplier_email": "sanjith@g.com",
-    "operations": [
-        {
-            "id": 1
-        }
-    ]
-}
-         */
-
 console.log(this.state.item);
         var data = {
-            "itemName": "Screw",
-            "itemDesc": "Description For Screw",
-            "availability": 250,
-            "cost": 10,
-            "supplier_email": "sanjith@g.com",
-            "operations": [
-                {
-                    "id": 1
-                }
-            ]
+            "itemName": this.state.item.itemName,
+            "itemDesc": this.state.item.itemDesc,
+            "availability": this.state.item.availability,
+            "cost": this.state.item.cost,
+            "supplier_email": this.state.item.supplier_email,
+            "operations": []
         };
 
         AdminService.createInventory(data).then(
@@ -102,32 +82,43 @@ console.log(this.state.item);
                             <div>
                                 <span>Item Name</span>
                                 <input type="text"
-                                    className="form-control" defaultValue={this.state.item.item_name}
+                                    className="form-control" defaultValue={this.state.item.itemName}
                                     onChange={this.handleChange.bind(this, 'itemName')} />
                             </div>
                             <div>
                                 <span>Description</span>
                                 <textarea className="form-control" rows="3"
-                                    defaultValue={this.state.item.item_desc}
-                                    onChange={this.handleChange.bind(this, 'description')}></textarea>
+                                    defaultValue={this.state.item.itemDesc}
+                                    onChange={this.handleChange.bind(this, 'itemDesc')}></textarea>
                             </div>
-                            <div>
-                                <span>Availability</span>
-                                <div >
+
+
+
+                            <div class="col row">
+                                <div class="col-xs-2">
+                                    <span>Availability</span>
                                     <input type="number"
-                                        className="form-control d-inline" defaultValue={this.state.item.availability}
+                                        className="form-control" defaultValue={this.state.item.availability}
                                         onChange={this.handleChange.bind(this, 'availability')} />
-                                    <a className="btn btn-blue ml-4 p-2 d-inline" href="mailto:someone@yoursite.com">Contact Supplier</a>
-
                                 </div>
-
+                                <div class="col-xs-3 ml-4">
+                                    <span>Supplier Email</span>
+                                    <input type="text"
+                                        className="form-control d-inline" defaultValue={this.state.item.supplier_email}
+                                        onChange={this.handleChange.bind(this, 'supplier_email')} />
+                                </div>
+                                <div class="col-xs-4">
+                                    <a className="btn btn-sm btn-blue m-4 p-2" href="mailto:someone@yoursite.com">Contact Supplier</a>
+                                </div>
                             </div>
+
                             <div>
                                 <span>Cost</span>
                                 <input type="number"
                                     className="form-control" defaultValue={this.state.item.cost}
                                     onChange={this.handleChange.bind(this, 'cost')} />
                             </div>
+                            
                         </div>
                         <div className="col">
                         <span> {this.state.item.operations_tagged ? 'Operatios Tagged' : 'No Operatios Tagged'}</span>

@@ -4,6 +4,8 @@ import { Accordion, Card } from "react-bootstrap";
 
 import { statusColorClass } from '../common/Utils.js';
 import Popup from "../components/Popup";
+import TableHeader from "../components/TableHeader";
+import TableRow from "../components/TableRow";
 
 import AdminService from "../services/admin.service";
 
@@ -13,15 +15,33 @@ class QuoteReqUpdate extends Component {
   state = {
     selectedItem: {},
     open: false,
-    operationsList: operationJson.operationsList,
+    operationsList: [],
+    tagoperationList: [],
     popupConfig: {},
     isPopupOpen: false,
-    selectedOperationId: 0
+    selectedOperationId: 0,
+    configOpId: 0,
+    totalCost: 0
   }
   constructor(props) {
     super(props);
     this.getSingleQuote();
+    this.getOperations();
   }
+  getOperations = () => {
+    AdminService.getAllOperations().then(
+      response => {
+        if (response) {
+          this.setState({
+            tagoperationList: response.data.rows
+          });
+        }
+      },
+      error => {
+        console.log("Error");
+      }
+    );
+  };
   getSingleQuote = () => {
     AdminService.getSingleQuote(this.props.selectedQuoteId).then(
       response => {
@@ -41,6 +61,7 @@ class QuoteReqUpdate extends Component {
   }
   showAvailableTools(id) {
     this.setState({
+      configOpId: id,
       selectedOperationId: id,
       isPopupOpen: true,
       popupConfig: {
@@ -50,30 +71,92 @@ class QuoteReqUpdate extends Component {
       }
     });
   }
-
+  showAvailableWorker(id) {
+    this.setState({
+      configOpId: id,
+      selectedOperationId: id,
+      isPopupOpen: true,
+      popupConfig: {
+        header: "Available Workers",
+        body: '',
+        type: "workerList"
+      }
+    });
+  }
 
   saveQuoteUpdate() {
 
-    // need to change based on measurements
+
+    var tmptoolobj = [];
+    this.state.operationsList.QuoteOperationInv.map((item, i) => {
+      var toolobj = {};
+      toolobj["invId"] = item.Inventories.id;
+      toolobj["reqQty"] = parseInt(item.req_quantity);
+      tmptoolobj.push(toolobj);
+    });
+
+
+    var tmpworkerobj = [];
+    this.state.operationsList.QuoteOperationWorker.map((item, i) => {
+      var workerobj = {};
+      workerobj["workerId"] = item.Workers.id;
+      workerobj["totalHrs"] = parseInt(item.total_hrs_req);
+      tmpworkerobj.push(workerobj);
+    });
+
+
     var data = {
-      "title": "Custom Tools Edit test",
-      "desc": "is simply dummy text of the printing and typesetti",
-      "measures": [{ "name": "subin", "unit": "1", "qty": "12" }],
-      "uploads": [{
-        "fileName": "haaaajkdfjkldsajfdsfdslk",
-        "filePath": "1234567890qsfdsfdfghdwertg"
-      }]
+      "quoteId": this.state.selectedItem.id,
+      "status": this.state.selectedItem.status,
+      "operations": [
+        {
+          "operationId": this.state.configOpId,
+          "inspection": "STANDARD",
+          "operation_total_hrs": this.state.operationsList.operation_total_hrs,
+          "operation_cost": this.state.operationsList.operation_cost,
+          "tools": tmptoolobj,
+          "workers": tmpworkerobj
+        }
+      ]
     };
-    AdminService.editQuote(this.props.selectedQuoteId, data).then(
+    AdminService.tagQuote(data).then(
       response => {
-        console.log(response);
+        console.log(response.data.message);
+        this.showPopupMessage(response.data.message);
       },
       error => {
         console.log("Error");
       }
     );
 
+
   }
+  submitQuoteUpdate() {
+    var data = {
+      "status": "QUOTE_RECEIVED"
+    };
+    AdminService.changeStatus(this.state.selectedItem.id ,data).then(
+      response => {
+        console.log(response);
+        this.showPopupMessage(response.data.message);
+      },
+      error => {
+        console.log("Error");
+      }
+    );
+  }
+
+  showPopupMessage(message){
+    this.setState({
+      isPopupOpen: true,
+      popupConfig : {
+          header: "Message",
+          body: message,
+          type: "message"
+      }
+    });
+  }
+
   handleBreadCrumb() {
     this.props.parentCallback();
   }
@@ -86,25 +169,63 @@ class QuoteReqUpdate extends Component {
   handleChange = e => {
     console.log(e);
   }
+
+
+
+
   handleReqAvailChange = event => {
     let { value, min, max } = event.target;
     value = Math.max(Number(min), Math.min(Number(max), Number(value)));
     alert(value);
     this.setState({ value });
   }
+
   handleClose = (list) => {
-    if(list) {
-      var newToolsList = [...this.state.operationsList[0].tools, ...list];
-      this.setState(prevState => ({
-        operationsList: prevState.operationsList.map(
-          obj => (obj.id === this.state.selectedOperationId ? Object.assign(obj, { tools: newToolsList }) : obj)
-        )
-      }));
-    }
     
+    if (list && this.state.popupConfig.type === "configureOperation") {
+      var obj = this.state.tagoperationList.find(o => o.id == this.state.configOpId);
+      if (obj) {
+        var QuoteOperation = {
+          "Operations": {
+            "id": obj.id,
+            "name": obj.name,
+            "desc": obj.desc
+          },
+          "QuoteOperationInv": list.tools,
+          "QuoteOperationWorker": list.workers,
+          "operation_cost": list.totalCost,
+          "operation_total_hrs": list.workers.reduce((a, v) => a = parseInt(a) + parseInt(v.total_hrs_req), 0)
+        };
+        var newQuoteOperation = [...this.state.selectedItem.QuoteOperation, QuoteOperation];
+
+        var selectedItem = this.state.selectedItem;
+        selectedItem.QuoteOperation = newQuoteOperation;
+        this.setState({
+          operationsList: QuoteOperation
+        });
+        this.setState({
+          selectedItem
+        });
+      }
+    }
+    else if (list && this.state.popupConfig.type === "toolsList") {
+      console.log(list);
+      debugger;
+      var obj = this.state.tagoperationList.find(o => o.id == this.state.configOpId);
+      if (obj) {
+        console.log(obj.OperationInventories);
+      }
+    } else if (list && this.state.popupConfig.type === "operationList") {
+      /*var tmp = this.state.operationsList;
+      tmp.push(list);
+      this.setState({
+        operationsList: tmp
+      });*/
+    }
     this.setState({
       isPopupOpen: false
     });
+
   };
 
   handleModalYes = () => {
@@ -126,6 +247,85 @@ class QuoteReqUpdate extends Component {
 
 
   };
+
+
+
+  handleOperationChange(event) {
+    this.setState({
+      configOpId: event.target.value
+    });
+
+    this.setState({
+      isPopupOpen: true,
+      popupConfig: {
+        header: "Configure Operations",
+        body: '',
+        type: "configureOperation"
+      }
+    });
+
+  };
+
+
+
+
+  showOperationTools(inventory) {
+
+
+    var tableHeader = ["inputCheckbox", "Tool Name", "Available Quantity", "Cost", "Required Quantity"];
+    return (
+      <Table responsive="sm">
+        <tbody>
+          <TableHeader
+            headerObj={tableHeader}
+            onCheckboxChange={this.handleChange}
+          />
+          {inventory && inventory.map((tool, i) => {
+            return (<TableRow
+              type="tool"
+              listItem={tool.Inventories}
+              reqQty={tool.req_quantity}
+            />);
+          })
+          }
+        </tbody>
+      </Table>
+    );
+  }
+
+  showOperationWorkers(workers) {
+    var tableHeader = ["inputCheckbox", "Worker Name", "Available per Day", "Cost per Hour", "Required Hour"];
+    return (
+      <Table responsive="sm">
+        <tbody>
+          <TableHeader
+            headerObj={tableHeader}
+            onCheckboxChange={this.handleChange}
+          />
+          {workers && workers.map((item, i) => {
+            return (<TableRow
+              type="worker"
+              listItem={item.Workers}
+              reqQty={item.total_hrs_req}
+            />);
+          })
+          }
+        </tbody>
+      </Table>
+    );
+
+  }
+  getCost() {
+
+
+    if (this.state.selectedItem.QuoteOperation) {
+      return (this.state.selectedItem.QuoteOperation.reduce((a, v) => a = a + v.operation_cost, 0));
+    } else {
+      return (0);
+    }
+
+  };
+
   render() {
 
     var userData = {};
@@ -160,7 +360,8 @@ class QuoteReqUpdate extends Component {
             </div>
             <div className="col-8 text-right">
               <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.resetReq()} >Reset</button>
-              <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.saveQuoteUpdate()}>Save</button>
+              <button type="button" className="btn btn-info btn-sm ml-2 pr-4 pl-4" onClick={() => this.saveQuoteUpdate()}>Save</button>
+              <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.submitQuoteUpdate()}>Submit</button>
             </div>
           </div>
 
@@ -199,14 +400,25 @@ class QuoteReqUpdate extends Component {
                     <span className="underline blue">Make a Quote</span>
                   </div>
                   <div className="col text-right">
+
+                    <select className="form-control btn-green mb-2" onChange={this.handleOperationChange.bind(this)}>
+                      <option>Tag Operations</option>
+                      {this.state.tagoperationList && this.state.tagoperationList.map((item, index) => (
+                        <option key={item.id} value={item.id}>{item.name}</option>
+                      ))}
+                    </select>
+
                     <span className="blue">Total Cost</span>
-                    <span className="badge btn-blue p-2 ml-2">54354.00</span>
+                    <span className="badge btn-blue p-2 ml-2">{this.getCost()}</span>
                   </div>
                 </div>
 
                 <div className="card-header measurements-header row mt-1 font-weight-bold">
                   <div className="col-sm">
                     <label>Operation</label>
+                  </div>
+                  <div className="col-sm">
+                    <label>Description</label>
                   </div>
                   <div className="col-sm">
                     <label>Hours</label>
@@ -228,30 +440,33 @@ class QuoteReqUpdate extends Component {
 
                 <Accordion>
 
-                  {this.state.operationsList && this.state.operationsList.map((operation, i) => {
+                  {this.state.selectedItem.QuoteOperation && this.state.selectedItem.QuoteOperation.map((operation, i) => {
                     return (
 
-                      <Card key={i+"cardKey"}>
+                      <Card key={i + "cardKey"}>
                         <Accordion.Toggle as={Card.Header} eventKey={i + ""}>
 
                           <div className="row mt-1 green-text-color">
                             <div className="col-sm">
-                              <label>{operation.operationName}</label>
+                              <label>{operation.Operations.name}</label>
                             </div>
                             <div className="col-sm">
-                              <label>{operation.hours}</label>
+                              <label>{operation.Operations.desc}</label>
                             </div>
                             <div className="col-sm">
-                              <label>{operation.workers}</label>
+                              <label>{operation.operation_total_hrs}</label>
+                            </div>
+                            <div className="col-sm">
+                              <label>{operation.QuoteOperationWorker && operation.QuoteOperationWorker.length}</label>
                             </div>
                             <div className="col-sm">
                               <label>{operation.inspection}</label>
                             </div>
                             <div className="col-sm">
-                              <label>{operation.cost}</label>
+                              <label>{operation.operation_cost}</label>
                             </div>
                             <div className="col-sm">
-                              <label>{operation.tools && operation.tools.length}</label>
+                              <label>{operation.QuoteOperationInv && operation.QuoteOperationInv.length}</label>
                               <button onClick={this.deleteOperation.bind(this)} className="btn delete-btn float-right mr-5" ></button>
                             </div>
                           </div>
@@ -259,49 +474,10 @@ class QuoteReqUpdate extends Component {
                         </Accordion.Toggle>
                         <Accordion.Collapse eventKey={i + ""}>
                           <Card.Body>
-                            <Button color="success" size="sm" onClick={() => this.showAvailableTools(operation.id)}>Add tools</Button>
-                            {operation.tools &&
-
-                              <Table responsive="sm">
-                                <tbody>
-                                  <tr className="green-text-color2">
-                                    <th>
-                                      <input type="checkbox" value="" name="selectAllTools" onChange={this.handleChange} />
-                                    </th>
-                                    <th>Tool Name</th>
-                                    <th>Unit</th>
-                                    <th>Available Quantity</th>
-                                    <th>Required Quantity</th>
-                                    <th>Cost</th>
-                                    <th><button className="btn delete-btn" onClick={this.removeTool.bind(this)}></button></th>
-                                  </tr>
-
-                                  {operation.tools && operation.tools.map((tool, i) => {
-                                    return (
-                                      <tr key={tool.id+"row"}>
-                                        <td>
-                                          <input type="checkbox" value="" />
-                                        </td>
-                                        <td>{tool.item_name}</td>
-                                        <td>{tool.unit}</td>
-                                        <td>{tool.availability}</td>
-                                        <td>
-                                          <input
-                                            onChange={this.handleReqAvailChange}
-                                            defaultValue={tool.availability}
-                                            type="number"
-                                            min="1"
-                                            max={tool.availability + ""}
-                                          />
-                                        </td>
-                                        <td>{tool.cost}</td>
-                                        <td></td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </Table>
-                            }
+                            <button type="button" className="btn btn-blue btn-sm ml-2 pr-4 pl-4" onClick={() => this.showAvailableTools(operation.Operations.id)}>Add Tools</button>
+                            {operation.QuoteOperationInv.length > 0 && this.showOperationTools(operation.QuoteOperationInv)}
+                            <button type="button" className="btn btn-blue btn-sm ml-2 pr-4 pl-4" onClick={() => this.showAvailableWorker(operation.Operations.id)}>Add Workers</button>
+                            {operation.QuoteOperationWorker.length > 0 && this.showOperationWorkers(operation.QuoteOperationWorker)}
                           </Card.Body>
                         </Accordion.Collapse>
                       </Card>

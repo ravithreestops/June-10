@@ -4,6 +4,8 @@ import { Button } from 'reactstrap';
 import Modal from "react-bootstrap/Modal";
 import ForgotPassword from "../common/ForgotPassword";
 import ToolsList from "../common/ToolsList";
+import OperationList from "../common/OperationList";
+import ConfigureOperation from "../common/ConfigureOperation";
 
 class Popup extends React.Component {
 
@@ -16,7 +18,13 @@ class Popup extends React.Component {
       case 'forgotPassword':
         return <ForgotPassword popupClose={this.props.parentCloseCallback}></ForgotPassword>;
       case 'toolsList':
-        return <ToolsList popupClose={this.toolsListCallback}></ToolsList>;
+        return <ConfigureOperation showTools={true} popupClose={this.toolsListCallback}></ConfigureOperation>;
+      case 'workerList':
+        return <ConfigureOperation showWorkers={true} popupClose={this.toolsListCallback}></ConfigureOperation>;
+      case 'configureOperation':
+        return <ConfigureOperation showTools={true} showWorkers={true} popupClose={this.toolsListCallback}></ConfigureOperation>;
+      case 'operationList':
+        return <OperationList popupClose={this.toolsListCallback}></OperationList>;
       default:
         return this.props.popupConfig.body;
     }

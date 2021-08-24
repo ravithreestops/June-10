@@ -27,13 +27,15 @@ class ToolsList extends Component {
                 }
             ],
             selectedToolList: [],
-            checkboxes: null,
+            checkboxes: [],
             searchValue: ""
         };
         this.setCheckbox();
     }
 
     setCheckbox() {
+        
+
         var tmpCheckboxes = this.state.OPTIONS.reduce(
             (options, option) => ({
                 ...options,

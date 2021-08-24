@@ -71,6 +71,14 @@ html, body, #root, #root>div {
   background-color: #c9cbcb;
   background-position: center;
 }
+
+.measure-delete-btn {
+  background-image: url("../images/delete.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 30px;
+}
 .edit-btn {
   background-image: url("../images/edit-btn.png");
   background-size: 50%;
@@ -339,7 +347,13 @@ p.ellipses_two {
 
   /***************** Sidebar Ends here *****************************/
 
-
+.modal-body {
+  .admin-list-page {
+    .quote-req-list {
+      color: #000;
+    }
+  }
+}
 
 .admin-list-page {
   .quote-req-list {
@@ -366,6 +380,15 @@ p.ellipses_two {
       margin-bottom: 5px;
     }
   }
+  .inspection-btngrp {
+    height: 40px;
+  }
+  .tax-div {
+    position: absolute;
+    margin-top: 42px;
+  }
+  
+ 
   .quote-req-table .row:last-of-type::after{
     content: "";
       background: #666;

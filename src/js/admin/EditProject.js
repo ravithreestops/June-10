@@ -57,14 +57,14 @@ class EditProject extends Component {
                             <div>
                                 <span>Project Name</span>
                                 <input type="text"
-                                    className="form-control" defaultValue={this.state.item.p_name}
-                                    onChange={this.handleChange.bind(this, 'p_name')} />
+                                    className="form-control" defaultValue={this.state.item.name}
+                                    onChange={this.handleChange.bind(this, 'name')} />
                             </div>
                             <div>
                                 <span>Description</span>
                                 <textarea className="form-control" rows="3"
-                                    defaultValue={this.state.item.p_desc}
-                                    onChange={this.handleChange.bind(this, 'p_desc')}></textarea>
+                                    defaultValue={this.state.item.desc}
+                                    onChange={this.handleChange.bind(this, 'desc')}></textarea>
                             </div>
                             
                         </div>
