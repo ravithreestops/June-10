@@ -1,55 +1,108 @@
 import React, { Component } from 'react';
-
-import {usersTag} from '../common/Constants';
-
 class Sidebar extends Component {
 
+    
+    constructor(props) {
+        super(props); 
+        this.state = {
+            activeLink: 1,
+            leftMenu: []
+        } 
+        this.selectMenu();
+    }
+    selectMenu() {
+        var adminFlag = JSON.parse(localStorage.getItem('user')).admin;
+        var menu = [];
+        if (adminFlag) {
+            menu = [
+                {
+                    id: 1,
+                    name: "Quotes",
+                    className: "nav-quote-req" 
+                },
+                {
+                    id: 2,
+                    name: "Projects ",
+                    className: "nav-projects "
+                },
+                {
+                    id: 3,
+                    name: "Operations",
+                    className: "nav-operations"
+                },
+                {
+                    id: 4,
+                    name: "Inventory",
+                    className: "nav-inventory"
+                },
+                {
+                    id: 5,
+                    name: "Worker",
+                    className: "nav-workers"
+                },
+                {
+                    id: 6,
+                    name: "Customer",
+                    className: "nav-customer"
+                },
+                {
+                    id: 7,
+                    name: "Inspection",
+                    className: "nav-inspection"
+                }
+            ];
+           
+        } else {
+             menu = [
+                {
+                    id: 1,
+                    name: "Projects ",
+                    className: "nav-projects "
+                },
+                {
+                    id: 2,
+                    name: "Operations",
+                    className: "nav-operations"
+                },
+                {
+                    id: 3,
+                    name: "Schedule",
+                    className: "nav-schedule"
+                }
+            ];
+        }
+        this.state.leftMenu = menu
+    }
+    selectMenuItem(id) {
+        this.setState({ activeLink: id });
+        this.props.onClick(id);
+    }
+
+
     render() {
-        var currentUserId = JSON.parse(localStorage.getItem('user')).userId;
         
+        const { leftMenu, activeLink } = this.state;
         return (
             <React.Fragment>
-                {currentUserId !== usersTag.WORKER_TAG ? 
-                ( <div className="sidebar-div">
-                    <ul className="nav flex-column">
-                        <li className="nav-item nav-quote-req" data-toggle="tooltip" data-placement="right" title="Quote Requests">
-                            <a className="nav-link active" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="1"></a>
-                        </li>
-                        <li className="nav-item nav-workers" data-toggle="tooltip" data-placement="right" title="Workers">
-                            <a className="nav-link" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="2"></a>
-                        </li>
-                        <li className="nav-item nav-mail" data-toggle="tooltip" data-placement="right" title="Customers">
-                            <a className="nav-link" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="3"></a>
-                        </li>
-                        <li className="nav-item nav-inventory" data-toggle="tooltip" data-placement="right" title="Inventory">
-                            <a className="nav-link" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="5"></a>
-                        </li>
-                        <li className="nav-item nav-operations" data-toggle="tooltip" data-placement="right" title="Operations">
-                            <a className="nav-link" href="#operations-page" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="6"></a>
-                        </li>
-                        <li className="nav-item nav-projects" data-toggle="tooltip" data-placement="right" title="Projects">
-                            <a className="nav-link" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="7"></a>
-                        </li>
-                        <li className="nav-item nav-test" data-toggle="tooltip" data-placement="right" title="Inspections">
-                            <a className="nav-link" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="4"></a>
-                        </li>    
-                    </ul>
-                </div> )
-                : 
-                ( <div className="sidebar-div">
-                    <ul className="nav flex-column">
-                        <li className="nav-item nav-operations" data-toggle="tooltip" data-placement="right" title="Operations">
-                            <a className="nav-link" href="#operations-page" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="1"></a>
-                        </li>
-                        <li className="nav-item nav-projects" data-toggle="tooltip" data-placement="right" title="Projects">
-                            <a className="nav-link" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="2"></a>
-                        </li>
-                        <li className="nav-item nav-test" data-toggle="tooltip" data-placement="right" title="Inspections">
-                            <a className="nav-link" data-toggle="tab" onClick={ (e) => this.props.onClick(e) } data-id="3"></a>
-                        </li>    
-                    </ul>
-                </div> )
-                }
+
+                    <div className="sidebar-div">
+                        <ul className="nav flex-column">
+                            {leftMenu && leftMenu.map(item => {
+                                return (
+                                    <li className={
+                                        item.className +
+                                        (item.id === activeLink ? " nav-item active_item" : " nav-item")
+                                      } key = {item.id}>
+                                        <p className="nav-link" data-toggle="tab" onClick={(e) => this.selectMenuItem(item.id)} >
+                                            <span>{item.name}</span>
+                                        </p>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                    
+                
             </React.Fragment>
         );
     }

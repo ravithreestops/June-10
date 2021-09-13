@@ -38,14 +38,7 @@ class ManageWorker extends Component {
     }
     editWorker() {
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            this.setState({
-                isPopupOpen: true,
-                popupConfig : {
-                    header: "Message",
-                    body:validationMessages.NO_ITEM,
-                    type: "message"
-                }
-            });
+            this.showPopup(validationMessages.NO_ITEM);
         } else {
             this.setState({
                 editWorkerPage: true
@@ -77,6 +70,7 @@ class ManageWorker extends Component {
                     listitems: tempList,
                     selectedItem: []
                 });
+                this.showPopup(response.data.message);
             },
             error => {
               console.log("Error");
@@ -86,14 +80,7 @@ class ManageWorker extends Component {
 
     deleteWorker() {
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            this.setState({
-                isPopupOpen: true,
-                popupConfig : {
-                    header: "Message",
-                    body:validationMessages.NO_ITEM,
-                    type: "message"
-                }
-            });
+            this.showPopup(validationMessages.NO_ITEM);
         } else {
             this.setState({
                 isPopupOpen: true,
@@ -110,7 +97,18 @@ class ManageWorker extends Component {
             selectedItem: selectedItem
         });
     }
-    parentCallback = () => {
+    showPopup(message){
+        this.setState({
+            isPopupOpen: true,
+            popupConfig : {
+                header: "Message",
+                body:message,
+                type: "message"
+            }
+        });
+    }
+    parentCallback = (message) => {
+        if(message) this.showPopup(message);
         this.setState({
             editWorkerPage: false
         });
@@ -179,7 +177,7 @@ class ManageWorker extends Component {
                                 </div>
 
                                 <div className="col-sm" >
-                                    <label>{listitem.address}</label>
+                                    <label className="description-truncate text-truncate" >{listitem.address}</label>
                                 </div>
 
                                 <div className="col-sm" >

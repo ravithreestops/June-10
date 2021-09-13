@@ -34,25 +34,7 @@ class WorkerProjects extends Component {
             searchValue: e.target.value.toLowerCase()
         });
     }
-    editProjects() {
-        this.setState({
-            editProjectPage: true
-        });
-    }
-    deleteProjects() {
-        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
-        this.setState({
-            listitems: tempList
-        });
-    }
-    addProjects() {
-        this.setState({
-            selectedItem: []
-        });
-        this.setState({
-            editProjectPage: true
-        });
-    }
+    
     onProjectSelected(selectedItem) {
         this.setState({
             selectedItem: selectedItem
@@ -81,9 +63,6 @@ class WorkerProjects extends Component {
                                 <span className="fa fa-search form-control-feedback"></span>
                                 <input type="text" className="form-control search-box" placeholder="Search projects..." onChange={this.handleSearchChange.bind(this)} />
                             </div>
-                            <button className="btn delete-btn" onClick={() => this.deleteProjects()}></button>
-                            <button className="btn edit-btn" onClick={() => this.editProjects()}></button>
-                            <button className="btn add-btn" onClick={() => this.addProjects()}></button>
                         </div>
                     </div>
                     <div className="quote-req-list">

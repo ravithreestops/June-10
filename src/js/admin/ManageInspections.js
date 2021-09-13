@@ -1,29 +1,41 @@
 import React, { Component } from 'react';
 import Popup from "../components/Popup";
 import { validationMessages } from '../common/Constants';
-import InspectionJson from '../../data/inspectionData.json';
+
+import AdminService from "../services/admin.service";
 
 
 class ManageInspection extends Component {
     state = {
-        listitems: InspectionJson.inspectionsList,
+        
         selectedItem: [],
         editInspectionPage: false,
         popupConfig: {},
         isPopupOpen: false
     }
+    constructor(props) {
+        super(props);
+        this.getAllInspectionList();
+    }
+    getAllInspectionList() {
+        AdminService.getAllInspection().then(
+            response => {
+                if(response){
+                    this.setState({
+                        listitems: response.data.inspections.rows
+                    });
+                }
+            },
+            error => {
+              console.log("Error");
+            }
+          );
+    }
 
     editInspection() {
        
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            this.setState({
-                isPopupOpen: true,
-                popupConfig : {
-                    header: "Message",
-                    body:validationMessages.NO_ITEM,
-                    type: "message"
-                }
-            });
+            this.showPopup(validationMessages.NO_ITEM);
         } else {
             this.setState({
                 editInspectionPage: true
@@ -49,8 +61,9 @@ class ManageInspection extends Component {
         this.setState({
             isPopupOpen: false
         });
-        /*AdminService.deleteInspection(this.state.selectedItem.id).then(
+        AdminService.deleteInspection(this.state.selectedItem.id).then(
             response => {
+                this.showPopup(response.data.message);
                 var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
                 this.setState({
                     listitems: tempList,
@@ -60,7 +73,7 @@ class ManageInspection extends Component {
             error => {
               console.log("Error");
             }
-          ); */  
+          );  
     }
 
     deleteInspection() {
@@ -70,20 +83,13 @@ class ManageInspection extends Component {
         });
         */
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            this.setState({
-                isPopupOpen: true,
-                popupConfig : {
-                    header: "Message",
-                    body:validationMessages.NO_ITEM,
-                    type: "message"
-                }
-            });
+            this.showPopup(validationMessages.NO_ITEM);
         } else {
             this.setState({
                 isPopupOpen: true,
                 popupConfig : {
                     header: "Confirm to Delete",
-                    body:validationMessages.DELETE_CONFIRM+this.state.selectedItem.item_name,
+                    body:validationMessages.DELETE_CONFIRM+this.state.selectedItem.name,
                     type: "confirmation"
                 }
             });
@@ -116,12 +122,54 @@ class ManageInspection extends Component {
         item[propertyName] = event.target.value;
         this.setState({ selectedItem: item });
     }
-   
+    showPopup(message){
+        this.setState({
+            isPopupOpen: true,
+            popupConfig : {
+                header: "Message",
+                body:message,
+                type: "message"
+            }
+        });
+    }
     saveInspection() {
         if(this.state.selectedItem.id !== undefined) {
-            alert("editted Successfuly");
+            var data = {
+                "name": this.state.selectedItem.name,
+                "cost": parseInt(this.state.selectedItem.cost),
+                "desc": this.state.selectedItem.desc
+            };
+
+            AdminService.editInspection(this.state.selectedItem.id ,data).then(
+                response => {
+                    if(response){
+                        this.showPopup(response.data.message);
+                    }
+                },
+                error => {
+                  console.log("Error");
+                }
+              );
+            
+
+
         } else {
-            alert("Added new");
+            var data = {
+                "name": this.state.selectedItem.name,
+                "cost": parseInt(this.state.selectedItem.cost),
+                "desc": this.state.selectedItem.desc
+            };
+            AdminService.createInspection(data).then(
+                response => {
+                    if(response){
+                        this.showPopup(response.data.message);
+                    }
+                },
+                error => {
+                  console.log("Error");
+                }
+              );
+            
         }
         
     }
@@ -156,8 +204,8 @@ class ManageInspection extends Component {
                 <div>
                     <span>Inspection Name</span>
                     <input type="text"
-                        className="form-control" defaultValue={this.state.selectedItem.item_name}
-                        onChange={this.handleChange.bind(this, 'item_name')} />
+                        className="form-control" defaultValue={this.state.selectedItem.name}
+                        onChange={this.handleChange.bind(this, 'name')} />
                 </div>
                 
                 <div>
@@ -170,9 +218,9 @@ class ManageInspection extends Component {
                 </div>
                 <div>
                     <span>Cost</span>
-                    <input type="text"
-                        className="form-control"  defaultValue={this.state.selectedItem.inspection_cost}
-                        onChange={this.handleChange.bind(this, 'inspection_cost')}/>
+                    <input type="number"
+                        className="form-control"  defaultValue={this.state.selectedItem.cost}
+                        onChange={this.handleChange.bind(this, 'cost')}/>
                 </div>
                 
                 
@@ -240,14 +288,14 @@ class ManageInspection extends Component {
                     </div>
                 </div>
                 <div className="quote-req-table">
-                    {this.state.listitems.map(listitem => (
+                    {this.state.listitems && this.state.listitems.map(listitem => (
                             <div className="row mt-1" key={listitem.id}>
                                 <div className="col-sm" >
                                     <label className="btn btn-default blue projectname-truncate text-truncate">
                                         <input type="radio" className="toggle"
                                             name="quoteItem" value={listitem.id}
                                             onChange={() => this.onInspectionSelected(listitem)} />
-                                        {listitem.item_name}
+                                        {listitem.name}
                                     </label>
 
                                 </div>
@@ -255,7 +303,7 @@ class ManageInspection extends Component {
                                     <label className="">{listitem.desc}</label>
                                 </div>
                                 <div className="col-sm" >
-                                    <label className="">{listitem.inspection_cost}</label>
+                                    <label className="">{listitem.cost}</label>
                                 </div>
                             </div>
                         ))}

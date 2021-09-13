@@ -31,25 +31,7 @@ class WorkerOperations extends Component {
             searchValue: e.target.value.toLowerCase()
         });
     }
-    editOperations() {
-        this.setState({
-            editOperationPage: true
-        });
-    }
-    deleteOperations() {
-        var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
-        this.setState({
-            listitems: tempList
-        });
-    }
-    addOperations() {
-        this.setState({
-            selectedItem: []
-        });
-        this.setState({
-            editOperationPage: true
-        });
-    }
+   
     onOperationSelected(selectedItem) {
         this.setState({
             selectedItem: selectedItem
@@ -78,9 +60,6 @@ class WorkerOperations extends Component {
                                 <span className="fa fa-search form-control-feedback"></span>
                                 <input type="text" className="form-control search-box" placeholder="Search quote requests..." onChange={this.handleSearchChange.bind(this)} />
                             </div>
-                            <button className="btn delete-btn" onClick={() => this.deleteOperations()}></button>
-                            <button className="btn edit-btn" onClick={() => this.editOperations()}></button>
-                            <button className="btn add-btn" onClick={() => this.addOperations()}></button>
                         </div>
                     </div>
                     <div className="quote-req-list">

@@ -11,11 +11,11 @@ import WorkerSchedule from './WorkerTimesheet';
 
 class WorkerDashboard extends React.Component {
     state = {
-        pageName: '1'
+        pageName: 1
     }
-    switchPage(e) {
+    switchPage(pageId) {
         this.setState({
-            pageName: e.target.dataset.id
+            pageName: pageId
         });
     }
 
@@ -27,21 +27,23 @@ class WorkerDashboard extends React.Component {
                     <Slidebar onClick={this.switchPage.bind(this)}></Slidebar>
                     {(() => {
                         switch (this.state.pageName) {
-                            case '1':
+                            case 1:
+                                return (
+                                    <WorkerProjects></WorkerProjects>
+                                    
+                                )
+                            case 2:
                                 return (
                                     <WorkerOperations></WorkerOperations>
                                 )
-                            case '2':
-                                return (
-                                    <WorkerProjects></WorkerProjects>
-                                )
-                            case '3':
+                            case 3:
                                 return(
                                     <WorkerSchedule></WorkerSchedule>
+                                    
                                 )
                             default:
                                 return (
-                                    <WorkerOperations></WorkerOperations>
+                                    <WorkerSchedule></WorkerSchedule>
                                 )
                         }
 

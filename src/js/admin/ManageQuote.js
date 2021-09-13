@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 
-import Popup from "../components/Popup";
+
+import AdminService from "../services/admin.service";
 import EditQuote from './EditQuote';
+
+import Popup from "../components/Popup";
 import { validationMessages } from '../common/Constants';
 import { statusColorClass } from '../common/Utils.js';
-import AdminService from "../services/admin.service";
 
 class ManageQuote extends Component {
 
@@ -18,19 +20,17 @@ class ManageQuote extends Component {
     }
     constructor(props) {
         super(props);
-        this.getAllQuoteCall();
+        this.getAllQuotes();
     }
     render() {
         return (
             <React.Fragment>
                 <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
-
                 {this.state.updateQuotePage ? <EditQuote selectedQuoteId= {this.state.selectedItem.id} parentCallback= {this.parentCallback}/> : this.renderQuoteList() }
-
             </React.Fragment>
         );
     }
-    getAllQuoteCall() {
+    getAllQuotes() {
         AdminService.getAllQuotes().then(
             response => {
                 if(response){
@@ -77,19 +77,21 @@ class ManageQuote extends Component {
               console.log("Error");
             }
           );
-
-        
     };
+
+    showPopup(message) {
+        this.setState({
+            isPopupOpen: true,
+            popupConfig : {
+                header: "Message",
+                body:message,
+                type: "message"
+            }
+        });
+    }
     deleteQuote() {
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            this.setState({
-                isPopupOpen: true,
-                popupConfig : {
-                    header: "Message",
-                    body:validationMessages.NO_ITEM,
-                    type: "message"
-                }
-            });
+            this.showPopup(validationMessages.NO_ITEM);
         } else {
             this.setState({
                 isPopupOpen: true,
@@ -104,14 +106,7 @@ class ManageQuote extends Component {
 
     editQuote() {
         if (this.state.selectedItem && this.state.selectedItem.length === 0) {
-            this.setState({
-                isPopupOpen: true,
-                popupConfig : {
-                    header: "Message",
-                    body:validationMessages.NO_ITEM,
-                    type: "message"
-                }
-            });
+            this.showPopup(validationMessages.NO_ITEM);
         } else {
             this.setState({
                 updateQuotePage: true
@@ -177,11 +172,10 @@ class ManageQuote extends Component {
                                 </div>
 
                                 <div className="col-sm">
-                                    <label></label>
+                                    <label>{item.User.name}</label>
                                 </div>
                                 <div className="col-sm">
                                     <label>{(new Date(item.createdAt)).toLocaleDateString()}</label>
-
                                 </div>
                                 <div className="col-sm">
                                     <label>{(new Date(item.updatedAt)).toLocaleDateString()}</label>
@@ -190,7 +184,7 @@ class ManageQuote extends Component {
                                     <span className={"badge " + statusColorClass(item.status)} >{item.status}</span>
                                 </div>
                                 <div className="col-sm text-right">
-                                    <span className="badge attachment-badge">{item.attachments && item.attachments.length}</span>
+                                    <span className="badge attachment-badge">{item.Uploads && item.Uploads.length}</span>
                                 </div>
                             </div>
                         ))}

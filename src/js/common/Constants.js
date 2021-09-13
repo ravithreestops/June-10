@@ -12,5 +12,13 @@ export const validationMessages = {
 export const usersTag = {
     ADMIN_TAG: 6,
     USER_TAG: 2,
-    WORKER_TAG: 10
+    WORKER_TAG: 1
 }
+
+/*
+
+Verified
+1. login
+2. sidebar.js, MyAlert.js Popup.js
+
+*/

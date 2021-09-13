@@ -103,14 +103,6 @@ class ManageProjects extends Component {
             });
         }
     }
-    addProjects() {
-        this.setState({
-            selectedItem: []
-        });
-        this.setState({
-            editProjectPage: true
-        });
-    }
     onProjectSelected(selectedItem) {
         this.setState({
             selectedItem: selectedItem
@@ -124,6 +116,17 @@ class ManageProjects extends Component {
             editProjectPage:false
           });
     }
+    getNumberOfDays(start, end) {
+        const date1 = new Date(start);
+        const date2 = new Date(end);
+        const oneDay = 1000 * 60 * 60 * 24;
+        const diffInTime = date2.getTime() - date1.getTime();
+        const diffInDays = Math.round(diffInTime / oneDay);
+        return diffInDays;
+    }
+    
+
+
     renderProjectList() {
         return(
             <div className="col admin-list-page" id="projects-page">
@@ -141,7 +144,6 @@ class ManageProjects extends Component {
                             </div>
                             <button className="btn delete-btn" onClick={() => this.deleteProjects()}></button>
                             <button className="btn edit-btn" onClick={() => this.editProjects()}></button>
-                            <button className="btn add-btn" onClick={() => this.addProjects()}></button>
                         </div>
                     </div>
                     <div className="quote-req-list">
@@ -153,10 +155,10 @@ class ManageProjects extends Component {
                                 <label>Description</label>
                             </div>
                             <div className="col-sm">
-                                <label>Hours Commited</label>
+                                <label>Days Commited</label>
                             </div>
                             <div className="col-sm">
-                                <label>Hours Left</label>
+                                <label>Days Left</label>
                             </div>
 
                             <div className="col-sm">
@@ -190,19 +192,20 @@ class ManageProjects extends Component {
                                             <label className="description-truncate text-truncate">{listitem.desc}</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.hours_commited}</label>
+                                            <label>{this.getNumberOfDays(listitem.start_date,listitem.end_date)}</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.hours_left}</label>
+                                            {(new Date(listitem.start_date) < new Date()) ? (<label>{this.getNumberOfDays(new Date(),listitem.end_date)}</label>) : <label>{this.getNumberOfDays(listitem.start_date,listitem.end_date)}</label>}
+                                            
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.start_date}</label>
+                                            <label>{(new Date(listitem.start_date)).toLocaleDateString() }</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.end_date}</label>
+                                            <label>{(new Date(listitem.end_date)).toLocaleDateString() }</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label className = {"badge " + statusColorClass(listitem.p_status)} >{listitem.p_status}</label>
+                                            <label className = {"badge " + statusColorClass(listitem.status)} >{listitem.status}</label>
                                         </div>
                                     </div>
                                 ))}

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import AdminService from "../services/admin.service";
 
 class EditCustomer extends Component {
     state = {
@@ -12,35 +13,28 @@ class EditCustomer extends Component {
     }
     saveCustomer() {
         if(this.state.item.id !== undefined) {
-            alert("editted Successfuly");
-        } else {
-            this.createCustomer();
-        }
+            this.editCustomer();
+        } 
         this.props.parentCallback();
     }
 
-    createCustomer() {
-        console.log(this.state.item);
-       /* var data = {
+    editCustomer() {
+        var data = {
             "name": this.state.item.name,
-            "phone": this.state.item.phone,
-            "address" : this.state.item.address,
             "email": this.state.item.email,
-            "avail_per_day": this.state.item.avail_per_day,
-            "cost_per_hr" : this.state.item.cost_per_hr,
-            "total_avail_per_week": this.state.item.total_avail_per_week,
-            "professionId": this.state.item.professionId
+            "phone": this.state.item.phone,
+            "address" : this.state.item.address
         };
 
-        AdminService.createWorker(data).then(
+        AdminService.editCustomer(this.state.item.id, data).then(
             response => {
                 console.log(response);
-                alert("New item added");
+                alert(response.data.message);
             },
             error => {
                 console.log("Error");
             }
-        ); */
+        ); 
     }
 
     resetReq() {
@@ -89,7 +83,7 @@ class EditCustomer extends Component {
                                 <span>Phone</span>
                                 <input type="text"
                                     className="form-control" defaultValue={this.state.item.phone}
-                                    onChange={this.handleChange.bind(this, 'c_phone')} />
+                                    onChange={this.handleChange.bind(this, 'phone')} />
                             </div>
                             <div>
                                 <span>Address</span>

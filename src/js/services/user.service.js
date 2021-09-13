@@ -39,7 +39,53 @@ class UserService {
             url: API_URL + 'quotes',
             data: data
         };
-        console.log(config);
+        return axios(config)
+            .then(function (response) {
+                console.log(response);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    editQuote(quoteId, data) {
+        var config = {
+            method: 'put',
+            url: API_URL + 'quotes/' + quoteId,
+            data: data
+        };
+        return axios(config)
+            .then(function (response) {
+                console.log(response);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    changeStatus(id, data) {
+        var config = {
+            method: 'post',
+            url: API_URL + 'quotes/'+ id +'/changeStatus',
+            data: data
+        };
+        return axios(config)
+            .then(function (response) {
+                console.log(response);
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    savePOUrl(id, data) {
+        var config = {
+            method: 'post',
+            url: API_URL + 'quotes/submitPOUrl/'+ id ,
+            data: data
+        };
         return axios(config)
             .then(function (response) {
                 console.log(response);

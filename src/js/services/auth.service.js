@@ -24,6 +24,27 @@ class AuthService {
                 console.log(error);
             });
     }
+    loginWorker(data) {
+        var config = {
+            method: 'post',
+            url: API_URL + 'workerLogin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        };
+        return axios(config)
+            .then(function (response) {
+                if(response.data) {
+                    localStorage.setItem("user", JSON.stringify(response.data));
+                }
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
 
     logout() {
         localStorage.removeItem("user");

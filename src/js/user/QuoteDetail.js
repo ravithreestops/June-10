@@ -3,18 +3,24 @@ import S3 from 'react-aws-s3';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+import UserService from "../services/user.service";
+
+import Popup from "../components/Popup";
+
 const today = new Date();
 class QuoteDetail extends Component {
     state = {
         formInputList: this.props.dataFromParent.Measures,
         selectedItem: this.props.dataFromParent,
-        measuresObjId: this.props.dataFromParent.Measures.length
+        measuresObjId: this.props.dataFromParent.Measures.length,
+        popupConfig: {},
+        isPopupOpen: false
     }
     constructor(props) {
         super(props);
-        let newMeasuresArray = this.state.selectedItem.Measures && this.state.selectedItem.Measures.map(function(item,index) { 
-            item.id = index+1;
-            return item; 
+        let newMeasuresArray = this.state.selectedItem.Measures && this.state.selectedItem.Measures.map(function (item, index) {
+            item.id = index + 1;
+            return item;
         });
         let newObj = this.state.selectedItem;
         newObj.Measures = newMeasuresArray;
@@ -35,9 +41,9 @@ class QuoteDetail extends Component {
     }
 
     handleMeasureChange(id, propertyName, event) {
-        var tmpObj  = this.state.selectedItem;
+        var tmpObj = this.state.selectedItem;
         tmpObj.Measures.find(o => o.id == id)[propertyName] = event.target.value;
-        this.setState({selectedItem: tmpObj});
+        this.setState({ selectedItem: tmpObj });
     }
 
     newQuote() {
@@ -47,13 +53,32 @@ class QuoteDetail extends Component {
         this.props.parentEditCallBack();
     }
     saveQuote() {
-        console.log(this.state);
+        let newMeasuresArray = this.state.selectedItem.Measures.map(function(item) { 
+            delete item.id; 
+            return item; 
+        });
+
+        var data = {
+            "title": this.state.selectedItem.title,
+            "desc": this.state.selectedItem.desc,
+            "measures": newMeasuresArray
+        };
+        UserService.editQuote(this.state.selectedItem.id, data).then(
+            response => {
+                //this.props.parentCreateCallBack(response.data);
+                //console.log(response.data);
+                debugger;
+            },
+            error => {
+                console.log("Error");
+            }
+        );
     }
 
     addMeasuresClick() {
         let tmpObj = this.state.selectedItem;
         let tmpId = this.state.measuresObjId + 1;
-        this.setState({measuresObjId: tmpId});
+        this.setState({ measuresObjId: tmpId });
 
         let measuresObj = {
             "id": tmpId,
@@ -62,18 +87,75 @@ class QuoteDetail extends Component {
             "qty": ""
         };
         tmpObj.Measures = [...tmpObj.Measures, measuresObj];
-        this.setState({selectedItem: tmpObj});
+        this.setState({ selectedItem: tmpObj });
     }
-    
+
     handleRemoveClick(id, event) {
-        var tmpObj  = this.state.selectedItem;
+        
+        var tmpObj = this.state.selectedItem;
         tmpObj.Measures = this.state.selectedItem.Measures.filter(o => o.id != id);
-        this.setState({selectedItem: tmpObj}); 
+        this.setState({ selectedItem: tmpObj }); 
+    }
+    handleClose = () => {
+        this.setState({
+            isPopupOpen: false
+        });
+    }
+    removeUploadedImage(file) {
+
+
+        const config = {
+            bucketName: 'fuentes-fileupload',
+            dirName: 'quote-attachments',
+            region: 'us-west-1',
+            accessKeyId: 'AKIA5ARA5MYMNVC47U6F',
+            secretAccessKey: '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'
+        }
+       
+       
+        const ReactS3Client = new S3(config);
+
+        const filename = file.fileName;
+
+        ReactS3Client
+            .deleteFile(filename)
+            .then(response => console.log(response))
+            .catch(err => console.error(err))
+
+
+
+
+    }
+    showUploadImage(filePath) {
+        this.setState({
+            isPopupOpen: true,
+            popupConfig: {
+                header: "Uploaded Data",
+                body: filePath,
+                type: "image"
+            }
+        });
+    }
+    renderUploadsSection(uploads) {
+        return (<div className="form-group">
+            <span className="underline blue">Uploads</span>
+            {uploads && uploads.map((item, index) => {
+                return (
+                    <div className="row pb-2" >
+                        <div className="col">
+                            <button className="btn btn-link" onClick={() => this.showUploadImage(item.filePath)}>{item.fileName}</button>
+                        </div>
+                    </div>
+                )
+            })
+
+            }
+        </div>);
     }
     renderMeasurementsDetailSection(measures) {
 
         return (<div className="form-group">
-            <label>Measurements</label>
+            <span className="underline blue">Measurements</span>
             {measures.length > 0 &&
                 <div className="row">
                     <div className="col">
@@ -88,9 +170,9 @@ class QuoteDetail extends Component {
                 </div>
             }
 
-            {measures && measures.map((item,index) => {
+            {measures && measures.map((item, index) => {
                 return (
-                    <div className="row pb-2" key={item.id}>
+                    <div className="row pb-2 green-text-color" key={item.id}>
                         <div className="col">
                             <label>{item.name}</label>
                         </div>
@@ -100,10 +182,11 @@ class QuoteDetail extends Component {
                         <div className="col">
                             <label>{item.qty}</label>
                         </div>
-                        
+
                     </div>
                 )
-            })
+            }
+            )
 
             }
         </div>);
@@ -131,7 +214,7 @@ class QuoteDetail extends Component {
                 </div>
             }
 
-            {measures && measures.map((item,index) => {
+            {measures && measures.map((item, index) => {
                 return (
                     <div className="row pb-2" key={item.id}>
                         <div className="col">
@@ -176,17 +259,17 @@ class QuoteDetail extends Component {
 
                     <div className="form-group">
                         <label htmlFor="title">Title</label>
-                        <input type="text" className="form-control" id="title" 
-                        defaultValue={selectedQuote.title}
-                        onChange={this.handleFormChange.bind(this, 'title')}
+                        <input type="text" className="form-control" id="title"
+                            defaultValue={selectedQuote.title}
+                            onChange={this.handleFormChange.bind(this, 'title')}
                         />
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="description">Description</label>
                         <textarea className="form-control" id="description" rows="3"
-                        defaultValue={selectedQuote.desc}
-                        onChange={this.handleFormChange.bind(this, 'desc')}
+                            defaultValue={selectedQuote.desc}
+                            onChange={this.handleFormChange.bind(this, 'desc')}
                         ></textarea>
                     </div>
 
@@ -223,15 +306,41 @@ class QuoteDetail extends Component {
                             <small>{selectedQuote.Uploads && selectedQuote.Uploads.length}</small>
                             <small>Attachments</small>
                         </div>
+                        <div className="row pb-2" >
+                            {selectedQuote.Uploads && selectedQuote.Uploads.map((item, index) => {
+                                return (
+                                    <div className="">
+                                        <button className="btn btn-link" onClick={() => this.showUploadImage(item.filePath)}>{item.fileName}</button>
+                                        <button class="btn remove-btn" onClick={() => this.removeUploadedImage(item)}></button>
+                                    </div>
+                                )
+                            })
+                            }
+                        </div>
 
                     </div>
                 </div>
             )
         }
     }
+    
+    linkPOUrl(file){
+        var data = {
+            "submit_PO": file.location
+        };
+        UserService.savePOUrl(this.state.selectedItem.id, data).then(
+            response => {
+                alert(response.data.message);
+            },
+            error => {
+                console.log("Error");
+            }
+        );
+    }
+
     handleFileInput(e) {
         const file = e.target.files[0];
-        if(file) {
+        if (file) {
             const config = {
                 bucketName: 'fuentes-fileupload',
                 dirName: 'purchase-order',
@@ -241,14 +350,19 @@ class QuoteDetail extends Component {
             }
             const ReactS3Client = new S3(config);
             const newFileName = 'test-file';
-    
+
             ReactS3Client
                 .uploadFile(file, newFileName)
-                .then(data => console.log(data))
+                .then(data => {
+                    this.linkPOUrl(data);
+                    //TODO: Change status QUOTE_PO_SUBMIT
+                    // Save var newfilePath = data.location;
+                    
+                })
                 .catch(err => console.error(err))
-        }   
+        }
     }
-    
+
 
     renderQuoteDetails() {
         if (this.props.dataFromParent) {
@@ -262,9 +376,14 @@ class QuoteDetail extends Component {
                         <span className="underline blue">Description</span>
                         <p>{this.props.dataFromParent.desc}</p>
                     </div>
-                    
+
                     <div className="row">
-                        <div className="col-4">
+                        
+                        <div className="col">
+                            <span className="underline blue mb-2">Submitted On</span>
+                            <p>{(new Date(this.props.dataFromParent.createdAt)).toLocaleDateString()}</p>
+                        </div>
+                        <div className="col">
                             <span className="underline blue">Tentitive Start Date</span>
                             <p>{(new Date(this.props.dataFromParent.startDate)).toLocaleDateString()}</p>
                         </div>
@@ -273,35 +392,49 @@ class QuoteDetail extends Component {
                             <p>{(new Date(this.props.dataFromParent.endDate)).toLocaleDateString()}</p>
                         </div>
                     </div>
+                    {this.renderUploadsSection(this.props.dataFromParent.Uploads)}
 
-                    <div>
-                        <span className="underline blue">Inspection</span>
-                        <p>{this.props.dataFromParent.inspection}</p>
-                    </div>
-
-                    <div>
-                        <span className="underline blue">Total Cost</span>
-                        <p>9897</p>
-                    </div>
-
-                    <div className="row">
-                        <div className="col-4">
-                            <span className="underline blue mb-2">Submitted On</span>
-                            <p>{(new Date(this.props.dataFromParent.createdAt)).toLocaleDateString()}</p>
+                    {this.props.dataFromParent.status == "QUOTE_RECEIVED" &&
+                    <div class="purchase-order d-inline-block form-group">
+                        <span className="underline blue mb-2">Order details</span>
+                        <div class="row ml-2">
+                            <div class="col-md-8">Operation Cost</div>
+                            <div class="col-md-2">2</div>
+                            <div class="col-md-8">Inspection Amount</div>
+                            <div class="col-md-2">1</div>
+                            <div class="col-md-8">Sub Total</div>
+                            <div class="col-md-2">3</div>
+                            <div class="col-md-8">Total tax</div>
+                            <div class="col-md-2">5%</div>
+                            <div class="col-md-8"></div>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-8">Total Cost</div>
+                            <div class="col-md-2">8</div>
                         </div>
+                    </div>
+                    
+                }
+                   
+
+                   
+
+                    <div className="d-inline-block">
+                        
                         <div className="col">
                             <span className="underline blue mb-2">Status</span>
                             <p> {this.props.dataFromParent.status}
-                                
-                            { this.props.dataFromParent.status=="QUOTE_RECEIVED" &&
-                                <label className="btn btn-green btn-sm pr-4 pl-4 ml-2">
-                                    Submit P O <input type="file" hidden onChange={this.handleFileInput.bind(this)} />
-                                </label>
-                            }
-                       
+
+                                {this.props.dataFromParent.status == "QUOTE_RECEIVED" &&
+                                    <label className="btn btn-green btn-sm pr-4 pl-4 ml-2">
+                                        Submit P O <input type="file" hidden onChange={this.handleFileInput.bind(this)} />
+                                    </label>
+                                }
+
                             </p>
                         </div>
                     </div>
+
+
                     {this.renderMeasurementsDetailSection(this.props.dataFromParent.Measures)}
                 </div>
                 /*<div className="blue-box-div">
@@ -357,32 +490,35 @@ class QuoteDetail extends Component {
     }
     render() {
         return (
-            <div className="app flex-row align-items-center" >
+            <React.Fragment>
+                <Popup popupConfig={this.state.popupConfig} openFlag={this.state.isPopupOpen} parentCloseCallback={this.handleClose} ></Popup>
 
-                <div className="list-group-header section-header row">
-                    <div className="col">
-                        <span className="mb-1 underline">Quote </span>
-                        <span className="mb-1 blue-color pl-2"> Detail</span>
+                <div className="app flex-row align-items-center" >
+
+                    <div className="list-group-header section-header row">
+                        <div className="col">
+                            <span className="mb-1 underline">Quote </span>
+                            <span className="mb-1 blue-color pl-2"> Detail</span>
+                        </div>
+                        <div className="col text-right">
+                            <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.newQuote()}>New</button>
+
+
+                            {this.props.isQuoteEditActive
+                                ? <button type="button" className="btn btn-green btn-sm pr-4 pl-4 ml-2" onClick={() => this.saveQuote()}>Save</button>
+                                : <button type="button" className="btn btn-green btn-sm pr-4 pl-4 ml-2" onClick={() => this.editQuote()}>Edit</button>
+                            }
+
+                        </div>
                     </div>
-                    <div className="col text-right">
-                        <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.newQuote()}>New</button>
 
+                    {this.props.isQuoteEditActive
+                        ? this.renderEditQuote()
+                        : this.renderQuoteDetails()
+                    }
 
-                        {this.props.isQuoteEditActive
-                            ? <button type="button" className="btn btn-green btn-sm pr-4 pl-4 ml-2" onClick={() => this.saveQuote()}>Save</button>
-                            : <button type="button" className="btn btn-green btn-sm pr-4 pl-4 ml-2" onClick={() => this.editQuote()}>Edit</button>
-                        }
-
-                    </div>
                 </div>
-
-                {this.props.isQuoteEditActive
-                    ? this.renderEditQuote()
-                    : this.renderQuoteDetails()
-                }
-
-            </div>
-
+            </React.Fragment>
         );
     }
 }

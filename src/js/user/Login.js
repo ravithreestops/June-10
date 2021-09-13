@@ -1,12 +1,9 @@
 import React, { Component } from "react";
 import { Button, Card, CardBody, CardGroup, Col, Form, Input, InputGroup, Row } from "reactstrap";
-//import Spinner from 'react-bootstrap/Spinner';
 import { isEmail } from "validator";
-
 import {loginMessages, usersTag} from '../common/Constants';
 import MyAlert from "../components/MyAlert";
 import Popup from "../components/Popup";
-
 import AuthService from "../services/auth.service";
 
 class Login extends Component {
@@ -21,11 +18,13 @@ class Login extends Component {
                 "variant": "danger"
             },
             popupConfig: {},
-            isPopupOpen: false
+            isPopupOpen: false,
+            checkboxChecked: false
         }
         this.Password = this.Password.bind(this);
         this.Email = this.Email.bind(this);
         this.loginValidation = this.loginValidation.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     Email(event) {
@@ -50,33 +49,45 @@ class Login extends Component {
             this.showAlertMessage(loginMessages.EMAILERROR);
          } else {
             this.handleLogin(event);
-            //this.props.history.push("/WorkerDashboard");
-            //this.props.history.push("/AdminDashboard");
          }
     }
-
     handleLogin(event) {
         var data = JSON.stringify({
             "email": this.state.Email,
             "password": this.state.Password
         });
-        AuthService.login(data).then(
-            
-            response => {
-                if (response && response.data) {
-                    if(response.data.userId === usersTag.USER_TAG) {
-                        this.props.history.push("/Dashboard");
-                    } else if(response.data.userId === usersTag.ADMIN_TAG){
-                        this.props.history.push("/AdminDashboard");
-                    } 
-                } else {
+        if(this.state.checkboxChecked) {
+            AuthService.loginWorker(data).then(
+                response => {
+                    if (response && response.data) {
+                        this.props.history.push("/WorkerDashboard");
+                    } else {
+                        this.showAlertMessage(loginMessages.ERROR);
+                    }
+                },
+                error => {
                     this.showAlertMessage(loginMessages.ERROR);
                 }
-            },
-            error => {
-                this.showAlertMessage(loginMessages.ERROR);
-            }
-        );
+            );
+
+        } else {
+            AuthService.login(data).then(
+                response => {
+                    if (response && response.data) {
+                        if(response.data.userId === usersTag.USER_TAG) {
+                            this.props.history.push("/Dashboard");
+                        } else if(response.data.userId === usersTag.ADMIN_TAG){
+                            this.props.history.push("/AdminDashboard");
+                        } 
+                    } else {
+                        this.showAlertMessage(loginMessages.ERROR);
+                    }
+                },
+                error => {
+                    this.showAlertMessage(loginMessages.ERROR);
+                }
+            );
+        }
     }
 
     forgotPassword  = () =>  {
@@ -96,11 +107,14 @@ class Login extends Component {
         });
     };
 
+    handleChange(evt) {
+        this.setState({ checkboxChecked: evt.target.checked });
+    }
+
 
     render() {
         return (
            <Row className="justify-content-center login-div">
-
                 <Col md="9" lg="7" xl="6">
                     <CardGroup>
                         <Card className="p-2">
@@ -112,10 +126,11 @@ class Login extends Component {
                                     <InputGroup className="mb-4">
                                         <Input type="password" onChange={this.Password} placeholder="Enter Password" />
                                     </InputGroup>
-                                    <p className="forgot-password text-right">Forgot <span role="button" className="text-primary" onClick = {this.forgotPassword} >password?</span></p>
+                                    <input type="checkbox" onChange={this.handleChange.bind(this)}></input> Login as worker
+                                    <p className="forgot-password text-right">Forgot <span role="button" className="text-primary" onClick = {this.forgotPassword} >password?</span></p>                                   
                                     <Button color="success" onClick={this.loginValidation} >Login</Button>
                                 </Form>
-                                {this.state.showAlert && < MyAlert alertConfig = {this.state.alertConfig} showAlert={this.state.showAlert} /> }
+                                {this.state.showAlert && < MyAlert alertConfig = {this.state.alertConfig} /> }
                             </CardBody>
                         </Card>
                     </CardGroup>

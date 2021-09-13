@@ -14,11 +14,31 @@ class EditWorker extends Component {
     }
     saveWorker() {
         if(this.state.item.id !== undefined) {
-            alert("editted Successfuly");
+            this.editWorker();
         } else {
             this.createWorker();
         }
-        this.props.parentCallback();
+        
+    }
+    editWorker() {
+        var data = {
+            "name": this.state.item.name,
+            "phone": this.state.item.phone,
+            "address" : this.state.item.address,
+            "email": this.state.item.email,
+            "avail_per_day": this.state.item.avail_per_day,
+            "cost_per_hr" : this.state.item.cost_per_hr,
+            "total_avail_per_week": this.state.item.total_avail_per_week,
+            "professionId": this.state.item.professionId
+        };
+        AdminService.editWorker(this.state.item.id, data).then(
+            response => {
+                this.props.parentCallback(response.data.message);
+            },
+            error => {
+                console.log("Error");
+            }
+        ); 
     }
     createWorker() {
         console.log(this.state.item);
@@ -35,8 +55,7 @@ class EditWorker extends Component {
 
         AdminService.createWorker(data).then(
             response => {
-                console.log(response);
-                alert("New item added");
+                this.props.parentCallback(response.data.message);
             },
             error => {
                 console.log("Error");
@@ -106,19 +125,19 @@ class EditWorker extends Component {
                             </div>
                             <div>
                                 <span>Available per Day</span>
-                                <input type="text"
+                                <input type="number"
                                     className="form-control" defaultValue={this.state.item.avail_per_day}
                                     onChange={this.handleChange.bind(this, 'avail_per_day')} />
                             </div>
                             <div>
                                 <span>Cost per Hour</span>
-                                <input type="text"
+                                <input type="number"
                                     className="form-control" defaultValue={this.state.item.cost_per_hr}
                                     onChange={this.handleChange.bind(this, 'cost_per_hr')} />
                             </div>
                             <div>
                                 <span>Total Avalability per Week</span>
-                                <input type="text"
+                                <input type="number"
                                     className="form-control" defaultValue={this.state.item.total_avail_per_week}
                                     onChange={this.handleChange.bind(this, 'total_avail_per_week')} />
                             </div>

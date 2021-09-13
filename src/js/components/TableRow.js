@@ -11,10 +11,9 @@ const TableRow = ({ type, listItem, reqQty, isSelected, onreqQntyChange, onCheck
             name={listItem.id}
             checked={isSelected}
             onChange={onCheckboxChange}
-            className=""
           />
         </td>
-        <td  key="1" >{listItem.itemName}</td>
+        <td key="1" >{listItem.itemName}</td>
         <td key="2">{listItem.availability}</td>
         <td key="3">{listItem.cost}</td>
         <td key="4" >
@@ -25,7 +24,7 @@ const TableRow = ({ type, listItem, reqQty, isSelected, onreqQntyChange, onCheck
             onChange={onreqQntyChange}
           />
         </td>
-        
+
       </tr>);
     case 'worker':
       return (<tr key="workerRow">
@@ -35,7 +34,6 @@ const TableRow = ({ type, listItem, reqQty, isSelected, onreqQntyChange, onCheck
             name={listItem.id}
             checked={isSelected}
             onChange={onCheckboxChange}
-            className=""
           />
         </td>
         <td key="6">{listItem.name}</td>

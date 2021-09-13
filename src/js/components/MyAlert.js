@@ -1,7 +1,7 @@
 import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 
-function MyAlert({alertConfig,showAlert}) {
+function MyAlert({alertConfig}) {
     return (
       <>
         <Alert variant={alertConfig.variant}>
@@ -10,8 +10,6 @@ function MyAlert({alertConfig,showAlert}) {
             {alertConfig.message}
           </p>
         </Alert>
-  
-        
       </>
     );
   }

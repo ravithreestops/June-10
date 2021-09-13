@@ -12,15 +12,13 @@ import ManageProjects from './ManageProjects';
 import ManageCustomer from './ManageCustomer';
 import ManageInspections from './ManageInspections';
 
-
-
 class AdminDashboard extends React.Component {
     state = {
-        pageName: '1'
+        pageName: 1
     }
-    switchPage(e) {
+    switchPage(pageId) {
         this.setState({
-            pageName: e.target.dataset.id
+            pageName: pageId
         });
     }
 
@@ -32,33 +30,33 @@ class AdminDashboard extends React.Component {
                     <Slidebar onClick={this.switchPage.bind(this)}></Slidebar>
                     {(() => {
                         switch (this.state.pageName) {
-                            case '1':
+                            case 1:
                                 return (
-                                    <ManageQuote></ManageQuote>
+                                    <ManageQuote></ManageQuote> 
                                 )
-                            case '2':
+                            case 2:
+                                return (
+                                    <ManageProjects></ManageProjects>
+                                )
+                            case 3:
+                                return (
+                                    <ManageOperations></ManageOperations>  
+                                )
+                            case 4:
+                                return (
+                                    <ManageInventory></ManageInventory>    
+                                )
+                            case 5:
                                 return (
                                     <ManageWorker></ManageWorker>
                                 )
-                            case '3':
+                            case 6:
                                 return (
                                     <ManageCustomer></ManageCustomer>
                                 )
-                            case '4':
+                            case 7:
                                 return (
                                     <ManageInspections></ManageInspections>
-                                )
-                            case '5':
-                                return (
-                                    <ManageInventory></ManageInventory>
-                                )
-                            case '6':
-                                return (
-                                    <ManageOperations></ManageOperations>
-                                )
-                            case '7':
-                                return (
-                                    <ManageProjects></ManageProjects>
                                 )
                             default:
                                 return (

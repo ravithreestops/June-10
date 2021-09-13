@@ -144,20 +144,15 @@ class ManageOperations extends Component {
                                 <label>Description</label>
                             </div>
                             <div className="col-sm">
-                                <label>Start Date</label>
+                                <label>Tools & Materials Required </label>
                             </div>
                             <div className="col-sm">
-                                <label>End Date</label>
+                                <label>Created On</label>
                             </div>
                             <div className="col-sm">
-                                <label>Hours Commited</label>
+                                <label>Modified On</label>
                             </div>
-                            <div className="col-sm">
-                                <label>Hours Left</label>
-                            </div>
-                            <div className="col-sm">
-                                <label>Status</label>
-                            </div>
+                            
                         </div>
                         <div className="quote-req-table">
 
@@ -178,20 +173,21 @@ class ManageOperations extends Component {
                                             <label className="description-truncate text-truncate">{listitem.desc}</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.createdAt}</label>
+                                        
+                                            
+                                            <label className="description-truncate text-truncate">
+                                            <span className="badge date-badge mr-2">{listitem.toolsRequired.length}</span>
+                                                {listitem.toolsRequired.toString()}
+                                            </label>
+                                            
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.updatedAt}</label>
+                                            <label>{(new Date(listitem.createdAt)).toLocaleDateString()}</label>
                                         </div>
                                         <div className="col-sm" >
-                                            <label>{listitem.hoursCommited}</label>
+                                            <label>{(new Date(listitem.updatedAt)).toLocaleDateString()}</label>
                                         </div>
-                                        <div className="col-sm" >
-                                            <label>{listitem.hoursLeft}</label>
-                                        </div>
-                                        <div className="col-sm" >
-                                            <label>{listitem.status}</label>
-                                        </div>
+                                        
                                     </div>
                                 ))}
                         </div>
@@ -203,7 +199,7 @@ class ManageOperations extends Component {
         return (
             <React.Fragment>
                 <Popup popupConfig = {this.state.popupConfig} openFlag = {this.state.isPopupOpen} parentCloseCallback={this.handleClose.bind(this)} parentConfirmCallback = {this.handleModalYes.bind(this)}></Popup>
-                {this.state.editOperationPage ? <EditOperations selectedItem={this.state.selectedItem} parentCallback= {this.parentCallback}/> : this.renderOperationsList()}
+                {this.state.editOperationPage ? <EditOperations selectedId={this.state.selectedItem.id} parentCallback= {this.parentCallback}/> : this.renderOperationsList()}
             </React.Fragment>
         );
     }

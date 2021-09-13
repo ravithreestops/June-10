@@ -17,6 +17,8 @@ class QuoteReqUpdate extends Component {
     open: false,
     operationsList: [],
     tagoperationList: [],
+    inspectionsList: [],
+    selectedInspection: '',
     popupConfig: {},
     isPopupOpen: false,
     selectedOperationId: 0,
@@ -27,6 +29,7 @@ class QuoteReqUpdate extends Component {
     super(props);
     this.getSingleQuote();
     this.getOperations();
+    this.getInspections();
   }
   getOperations = () => {
     AdminService.getAllOperations().then(
@@ -42,6 +45,22 @@ class QuoteReqUpdate extends Component {
       }
     );
   };
+
+  getInspections = () => {
+    AdminService.getAllInspection().then(
+      response => {
+        if (response) {
+          this.setState({
+            inspectionsList: response.data.inspections.rows
+          });
+        }
+      },
+      error => {
+        console.log("Error");
+      }
+    );
+  };
+
   getSingleQuote = () => {
     AdminService.getSingleQuote(this.props.selectedQuoteId).then(
       response => {
@@ -111,7 +130,7 @@ class QuoteReqUpdate extends Component {
       "operations": [
         {
           "operationId": this.state.configOpId,
-          "inspection": "STANDARD",
+          "inspection": this.state.selectedInspection,
           "operation_total_hrs": this.state.operationsList.operation_total_hrs,
           "operation_cost": this.state.operationsList.operation_cost,
           "tools": tmptoolobj,
@@ -121,8 +140,10 @@ class QuoteReqUpdate extends Component {
     };
     AdminService.tagQuote(data).then(
       response => {
-        console.log(response.data.message);
-        this.showPopupMessage(response.data.message);
+        if(response)
+          this.showPopupMessage(response.data.message);
+        else 
+          this.showPopupMessage("Something went wrong!");
       },
       error => {
         console.log("Error");
@@ -135,7 +156,7 @@ class QuoteReqUpdate extends Component {
     var data = {
       "status": "QUOTE_RECEIVED"
     };
-    AdminService.changeStatus(this.state.selectedItem.id ,data).then(
+    AdminService.changeStatus(this.state.selectedItem.id, data).then(
       response => {
         console.log(response);
         this.showPopupMessage(response.data.message);
@@ -145,14 +166,28 @@ class QuoteReqUpdate extends Component {
       }
     );
   }
+  changeQuoteStatus(status) {
+    var data = {
+      "status": status
+    };
+    AdminService.changeStatus(this.state.selectedItem.id, data).then(
+      response => {
+        console.log(response);
+        this.showPopupMessage(response.msg);
+      },
+      error => {
+        console.log("Error");
+      }
+    );
+  }
 
-  showPopupMessage(message){
+  showPopupMessage(message) {
     this.setState({
       isPopupOpen: true,
-      popupConfig : {
-          header: "Message",
-          body: message,
-          type: "message"
+      popupConfig: {
+        header: "Message",
+        body: message,
+        type: "message"
       }
     });
   }
@@ -181,7 +216,7 @@ class QuoteReqUpdate extends Component {
   }
 
   handleClose = (list) => {
-    
+
     if (list && this.state.popupConfig.type === "configureOperation") {
       var obj = this.state.tagoperationList.find(o => o.id == this.state.configOpId);
       if (obj) {
@@ -209,11 +244,13 @@ class QuoteReqUpdate extends Component {
       }
     }
     else if (list && this.state.popupConfig.type === "toolsList") {
-      console.log(list);
+      console.log(this.state);
       debugger;
-      var obj = this.state.tagoperationList.find(o => o.id == this.state.configOpId);
+      var obj = this.state.selectedItem.QuoteOperation.find(o => o.Operations.id == this.state.configOpId);
       if (obj) {
-        console.log(obj.OperationInventories);
+        console.log(obj.QuoteOperationInv);
+        var newInventryList = [...obj.QuoteOperationInv, list.tools];
+        console.log(newInventryList);
       }
     } else if (list && this.state.popupConfig.type === "operationList") {
       /*var tmp = this.state.operationsList;
@@ -248,7 +285,11 @@ class QuoteReqUpdate extends Component {
 
   };
 
-
+  handleInspectionChange(event) {
+    this.setState({
+      selectedInspection: event.target.value
+    });
+  };
 
   handleOperationChange(event) {
     this.setState({
@@ -316,8 +357,6 @@ class QuoteReqUpdate extends Component {
 
   }
   getCost() {
-
-
     if (this.state.selectedItem.QuoteOperation) {
       return (this.state.selectedItem.QuoteOperation.reduce((a, v) => a = a + v.operation_cost, 0));
     } else {
@@ -325,6 +364,43 @@ class QuoteReqUpdate extends Component {
     }
 
   };
+
+  renderMeasureTable() {
+    var measures = this.state.selectedItem.Measures;
+    return (<div className="quote-data-div">
+      <span className="underline half blue">Measurements</span>
+
+      <div className="row">
+        <div className="col">
+          <label>Name</label>
+        </div>
+        <div className="col">
+          <label>Unit</label>
+        </div>
+        <div className="col">
+          <label>Quantity</label>
+        </div>
+      </div>
+
+      {measures && measures.map((item, index) => {
+        return (
+          <div className="row pb-2 green-text-color" key={item.id}>
+            <div className="col">
+              <label>{item.name}</label>
+            </div>
+            <div className="col">
+              <label>{item.unit}</label>
+            </div>
+            <div className="col">
+              <label>{item.qty}</label>
+            </div>
+
+          </div>
+        )
+      })
+      }
+    </div>);
+  }
 
   render() {
 
@@ -338,8 +414,6 @@ class QuoteReqUpdate extends Component {
     return (
       <React.Fragment>
         <Popup popupConfig={this.state.popupConfig} openFlag={this.state.isPopupOpen} parentCloseCallback={this.handleClose} parentConfirmCallback={this.handleModalYes.bind(this)}></Popup>
-
-
         <div className="col admin-quote-page">
           <div className="list-group-header section-header row">
             <div className="col-4">
@@ -358,13 +432,23 @@ class QuoteReqUpdate extends Component {
               </nav>
 
             </div>
-            <div className="col-8 text-right">
-              <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.resetReq()} >Reset</button>
-              <button type="button" className="btn btn-info btn-sm ml-2 pr-4 pl-4" onClick={() => this.saveQuoteUpdate()}>Save</button>
-              <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.submitQuoteUpdate()}>Submit</button>
-            </div>
-          </div>
+            {this.state.selectedItem.status === "QUOTE_PO_SUBMIT" &&
+              (
+                <div className="col-8 text-right">
+                  <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.changeQuoteStatus("QUOTE_REJECTED")} >Reject</button>
+                  <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.changeQuoteStatus("PROJECT_IN_PROGRESS")}>Accept Purchase Order</button>
+                </div>
 
+              ) }
+             {this.state.selectedItem.status === "NEW" || this.state.selectedItem.status === "WIP"  || this.state.selectedItem.status === "QUOTE_RECEIVED" &&
+                <div className="col-8 text-right">
+                  <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.resetReq()} >Reset</button>
+                  <button type="button" className="btn btn-info btn-sm ml-2 pr-4 pl-4" onClick={() => this.saveQuoteUpdate()}>Save</button>
+                  <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.submitQuoteUpdate()}>Submit</button>
+                </div>
+
+            }
+          </div>
           <div>
             <div className="blue-box-div row">
               <div className="col-3 white-border-right">
@@ -393,100 +477,148 @@ class QuoteReqUpdate extends Component {
                   <p className="green-text-color">{uploads && uploads.length}</p>
 
                 </div>
+                {this.state.selectedItem.Measures &&
+                  this.renderMeasureTable()
+                }
               </div>
-              <div className="col quote-measurements">
-                <div className="row">
-                  <div className="col">
-                    <span className="underline blue">Make a Quote</span>
-                  </div>
-                  <div className="col text-right">
 
-                    <select className="form-control btn-green mb-2" onChange={this.handleOperationChange.bind(this)}>
-                      <option>Tag Operations</option>
-                      {this.state.tagoperationList && this.state.tagoperationList.map((item, index) => (
-                        <option key={item.id} value={item.id}>{item.name}</option>
-                      ))}
-                    </select>
 
-                    <span className="blue">Total Cost</span>
-                    <span className="badge btn-blue p-2 ml-2">{this.getCost()}</span>
-                  </div>
-                </div>
+              {this.state.selectedItem.status === "PROJECT_IN_PROGRESS" || this.state.selectedItem.status === "QUOTE_PO_SUBMIT" ?
+                <div className="col">
+                  <div className="row">
+                    <div className="purchase-order d-inline-block form-group col">
+                      <span className="underline blue mb-2">Order details</span>
+                      <div className="row ml-2">
+                        <div className="col-md-8">Operation Cost</div>
+                        <div className="col-md-2">2</div>
+                        <div className="col-md-8">Inspection Amount</div>
+                        <div className="col-md-2">1</div>
+                        <div className="col-md-8">Sub Total</div>
+                        <div className="col-md-2">3</div>
+                        <div className="col-md-8">Total tax</div>
+                        <div className="col-md-2">5%</div>
+                        <div className="col-md-8"></div>
+                        <div className="col-md-2"></div>
+                        <div className="col-md-8">Total Cost</div>
+                        <div className="col-md-2">8</div>
+                      </div>
 
-                <div className="card-header measurements-header row mt-1 font-weight-bold">
-                  <div className="col-sm">
-                    <label>Operation</label>
+                    </div>
+
+                    <div className="col">
+                      <span className="underline blue mb-2">Purchase Order</span>
+                      <img src={this.state.selectedItem.submittedPO} className='img-thumbnail' alt='...'></img>
+
+                    </div>
+
                   </div>
-                  <div className="col-sm">
-                    <label>Description</label>
-                  </div>
-                  <div className="col-sm">
-                    <label>Hours</label>
-                  </div>
-                  <div className="col-sm">
-                    <label>Workers</label>
-                  </div>
-                  <div className="col-sm">
-                    <label>Inspection</label>
-                  </div>
-                  <div className="col-sm">
-                    <label>Cost</label>
-                  </div>
-                  <div className="col-sm">
-                    <label>Tools</label>
-                  </div>
+
 
                 </div>
+                :
 
-                <Accordion>
+                (<div className="col quote-measurements">
+                  <div className="row">
+                    <div className="col">
+                      <span className="underline blue">Make a Quote</span>
+                    </div>
+                    <div className="col text-right">
 
-                  {this.state.selectedItem.QuoteOperation && this.state.selectedItem.QuoteOperation.map((operation, i) => {
-                    return (
 
-                      <Card key={i + "cardKey"}>
-                        <Accordion.Toggle as={Card.Header} eventKey={i + ""}>
+                      <select className="form-control btn-green mb-2 mr-2 col-4 d-inline-block" defaultValue={this.state.selectedItem.InspectionId} onChange={this.handleInspectionChange.bind(this)}>
+                        <option>Add Inspection</option>
+                        {this.state.inspectionsList && this.state.inspectionsList.map((item, index) => (
+                          <option key={item.id} value={item.id}>{item.name}</option>
+                        ))}
+                      </select>
 
-                          <div className="row mt-1 green-text-color">
-                            <div className="col-sm">
-                              <label>{operation.Operations.name}</label>
-                            </div>
-                            <div className="col-sm">
-                              <label>{operation.Operations.desc}</label>
-                            </div>
-                            <div className="col-sm">
-                              <label>{operation.operation_total_hrs}</label>
-                            </div>
-                            <div className="col-sm">
-                              <label>{operation.QuoteOperationWorker && operation.QuoteOperationWorker.length}</label>
-                            </div>
-                            <div className="col-sm">
-                              <label>{operation.inspection}</label>
-                            </div>
-                            <div className="col-sm">
-                              <label>{operation.operation_cost}</label>
-                            </div>
-                            <div className="col-sm">
-                              <label>{operation.QuoteOperationInv && operation.QuoteOperationInv.length}</label>
-                              <button onClick={this.deleteOperation.bind(this)} className="btn delete-btn float-right mr-5" ></button>
-                            </div>
-                          </div>
 
-                        </Accordion.Toggle>
-                        <Accordion.Collapse eventKey={i + ""}>
-                          <Card.Body>
-                            <button type="button" className="btn btn-blue btn-sm ml-2 pr-4 pl-4" onClick={() => this.showAvailableTools(operation.Operations.id)}>Add Tools</button>
-                            {operation.QuoteOperationInv.length > 0 && this.showOperationTools(operation.QuoteOperationInv)}
-                            <button type="button" className="btn btn-blue btn-sm ml-2 pr-4 pl-4" onClick={() => this.showAvailableWorker(operation.Operations.id)}>Add Workers</button>
-                            {operation.QuoteOperationWorker.length > 0 && this.showOperationWorkers(operation.QuoteOperationWorker)}
-                          </Card.Body>
-                        </Accordion.Collapse>
-                      </Card>
+                      <select className="form-control btn-green mb-2 mr-2 col-4 d-inline-block" onChange={this.handleOperationChange.bind(this)}>
+                        <option>Tag Operations</option>
+                        {this.state.tagoperationList && this.state.tagoperationList.map((item, index) => (
+                          <option key={item.id} value={item.id}>{item.name}</option>
+                        ))}
+                      </select>
 
-                    );
-                  })}
-                </Accordion>
+                      <span className="blue">Total Cost</span>
+                      <span className="badge btn-blue p-2 ml-2">{this.getCost()}</span>
+                    </div>
+                  </div>
 
-              </div>
+                  <div className="card-header measurements-header row mt-1 font-weight-bold">
+                    <div className="col-sm">
+                      <label>Operation</label>
+                    </div>
+                    <div className="col-sm">
+                      <label >Description</label>
+                    </div>
+                    <div className="col-sm">
+                      <label>Hours</label>
+                    </div>
+                    <div className="col-sm">
+                      <label>Workers</label>
+                    </div>
+
+                    <div className="col-sm">
+                      <label>Cost</label>
+                    </div>
+                    <div className="col-sm">
+                      <label>Tools</label>
+                    </div>
+
+                  </div>
+
+                  <Accordion>
+
+                    {this.state.selectedItem.QuoteOperation && this.state.selectedItem.QuoteOperation.map((operation, i) => {
+                      return (
+
+                        <Card key={i + "cardKey"}>
+                          <Accordion.Toggle as={Card.Header} eventKey={i + ""}>
+
+                            <div className="row mt-1 green-text-color">
+                              <div className="col-sm">
+                                <label>{operation.Operations.name}</label>
+                              </div>
+                              <div className="col-sm">
+                                <label className="acc-description">{operation.Operations.desc}</label>
+                              </div>
+                              <div className="col-sm">
+                                <label>{operation.operation_total_hrs}</label>
+                              </div>
+                              <div className="col-sm">
+                                <label>{operation.QuoteOperationWorker && operation.QuoteOperationWorker.length}</label>
+                              </div>
+
+                              <div className="col-sm">
+                                <label>{operation.operation_cost}</label>
+                              </div>
+                              <div className="col-sm">
+                                <label>{operation.QuoteOperationInv && operation.QuoteOperationInv.length}</label>
+                                <button onClick={this.deleteOperation.bind(this)} className="btn delete-btn float-right mr-5" ></button>
+                              </div>
+                            </div>
+
+                          </Accordion.Toggle>
+                          <Accordion.Collapse eventKey={i + ""}>
+                            <Card.Body>
+                             {/* 
+  <button type="button" className="btn btn-blue btn-sm ml-2 pr-4 pl-4" onClick={() => this.showAvailableTools(operation.Operations.id)}>Add Tools</button>
+    <button type="button" className="btn btn-blue btn-sm ml-2 pr-4 pl-4" onClick={() => this.showAvailableWorker(operation.Operations.id)}>Add Workers</button>
+                                                        
+*/} 
+                              {operation.QuoteOperationInv.length > 0 && this.showOperationTools(operation.QuoteOperationInv)}
+                              {operation.QuoteOperationWorker.length > 0 && this.showOperationWorkers(operation.QuoteOperationWorker)}
+                            </Card.Body>
+                          </Accordion.Collapse>
+                        </Card>
+
+                      );
+                    })}
+                  </Accordion>
+
+                </div>)
+              }
 
             </div>
 

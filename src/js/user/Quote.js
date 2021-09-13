@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import S3 from 'react-aws-s3';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import UserService from "../services/user.service";
@@ -46,14 +47,8 @@ class UserQuote extends Component {
             "startDate": this.state.item.startDate,
             "endDate": this.state.item.endDate,
             "measures": newMeasuresArray,
-            "uploads": [
-                {
-                    "fileName": "haaaajkdfjkldsajfdsfdslk",
-                    "filePath": "1234567890qsfdsfdfghdwertg"
-                }
-            ]
+            "uploads": this.state.item.uploads
         };
-
         UserService.createQuote(data).then(
             response => {
                 this.props.parentCreateCallBack(response.data);
@@ -63,6 +58,42 @@ class UserQuote extends Component {
             }
         );
 
+    }
+
+    handleFileInput(e) {
+        const file = e.target.files[0];
+        if(file) {
+            const config = {
+                bucketName: 'fuentes-fileupload',
+                dirName: 'quote-attachments',
+                region: 'us-west-1',
+                accessKeyId: 'AKIA5ARA5MYMNVC47U6F',
+                secretAccessKey: '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'
+            }
+            const ReactS3Client = new S3(config);
+            const newFileName = file.name;
+    
+            ReactS3Client
+                .uploadFile(file, newFileName)
+                .then(data => {
+                    var newUploads = {
+                        "fileName": newFileName,
+                        "filePath": data.location
+                    };
+                    var obj = this.state.item;
+
+                    if(obj.uploads) {
+                        obj['uploads'].push(newUploads);
+                    } else {
+                        obj['uploads'] = [];
+                        obj['uploads'].push(newUploads);
+                    }
+                    this.setState({item:obj});
+
+                })
+                .catch(err => console.error(err))
+            
+        }   
     }
 
     handleFormChange(propertyName, event) {
@@ -217,7 +248,7 @@ class UserQuote extends Component {
                     <div>
                         <label>Attachments</label>
                         <label className="btn btn-blue btn-sm pr-4 pl-4 ml-2">
-                            Browse <input type="file" hidden />
+                            Browse <input type="file" hidden onChange={this.handleFileInput.bind(this)}/>
                         </label>
                     </div>
                 </div>
@@ -229,3 +260,12 @@ class UserQuote extends Component {
     }
 }
 export default UserQuote;
+
+
+
+/*
+{"message":"Quote created!","data":{"title":"Quote3","desc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec malesuada augue id velit gravida fringilla. Suspendisse fermentum eget magna placerat pharetra.","status":"NEW","startDate":"2021-08-25T07:00:00.000Z","endDate":"2021-08-31T07:00:00.000Z","measures":[{"name":"ewe","unit":"erew","qty":"2312"}],"uploads":[{"fileName":"Screen Shot 2021-03-17 at 9.12.19 AM.png","filePath":"https://fuentes-fileupload.s3-us-west-1.amazonaws.com/quote-attachments/Screen Shot 2021-03-17 at 9.12.19 AM.png"}]}}
+
+
+{"message":"Quote created!","data":{"title":"Quote5","desc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec malesuada augue id velit gravida fringilla. Suspendisse fermentum eget magna placerat pharetra.","status":"NEW","startDate":"2021-09-02T07:00:00.000Z","endDate":"2021-10-01T07:00:00.000Z","measures":[{"name":"das","unit":"dsf","qty":"2"}],"uploads":[{"fileName":"sample.png","filePath":"https://fuentes-fileupload.s3-us-west-1.amazonaws.com/quote-attachments/sample.png"}]}}
+*/

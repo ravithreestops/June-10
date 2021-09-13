@@ -149,6 +149,21 @@ class AdminService {
                 console.log(error);
             });
     }
+    editWorker(id,data) {
+        var config = {
+            method: 'put',
+            url: API_URL + 'workers/'+id,
+            data: data
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
 
     getAllOperations() {
         var config = {
@@ -164,10 +179,54 @@ class AdminService {
                 console.log(error);
             });
     }
+    getOperationById(id) {
+        var config = {
+            method: 'get',
+            url: API_URL + 'operation/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
     deleteOperation(id) {
         var config = {
             method: 'DELETE',
             url: API_URL + 'operation/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    createOperation(data) {
+        var config = {
+            method: 'post',
+            url: API_URL + 'operation',
+            data: data
+        };
+        console.log(config);
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    editOperation(id,data) {
+        var config = {
+            method: 'put',
+            url: API_URL + 'operation/'+id,
+            data: data
         };
 
         return axios(config)
@@ -200,6 +259,21 @@ class AdminService {
             data: data
         };
         console.log(config);
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    editInventory(id,data) {
+        var config = {
+            method: 'put',
+            url: API_URL + 'inventory/'+id,
+            data: data
+        };
+
         return axios(config)
             .then(function (response) {
                 return response;
@@ -251,6 +325,21 @@ class AdminService {
                 console.log(error);
             });
     }
+    editProject(id,data) {
+        var config = {
+            method: 'put',
+            url: API_URL + 'project/'+id,
+            data: data
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
 
     
     getAllCustomers() {
@@ -276,6 +365,99 @@ class AdminService {
 
         return axios(config)
             .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    editCustomer(id,data) {
+        var config = {
+            method: 'put',
+            url: API_URL + 'customer/'+id,
+            data: data
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    
+
+    getAllInspection() {
+        var config = {
+            method: 'get',
+            url: API_URL + 'inspection'
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    createInspection(data) {
+        var config = {
+            method: 'post',
+            url: API_URL + 'inspection',
+            data: data
+        };
+        console.log(config);
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    editInspection(id,data) {
+        var config = {
+            method: 'put',
+            url: API_URL + 'inspection/'+id,
+            data: data
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+    deleteInspection(id) {
+        var config = {
+            method: 'DELETE',
+            url: API_URL + 'Inspection/' + id
+        };
+
+        return axios(config)
+            .then(function (response) {
+                return response;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+
+    changeProjectStatus(id, data) {
+        var config = {
+            method: 'post',
+            url: API_URL + 'project/changeStatus/'+ id,
+            data: data
+        };
+        return axios(config)
+            .then(function (response) {
+                console.log(response);
                 return response;
             })
             .catch(function (error) {

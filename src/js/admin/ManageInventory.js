@@ -206,10 +206,10 @@ class ManageInventory extends Component {
                                 <label>{listitem.cost}</label>
                             </div>
                             <div className="col-sm" >
-                                <label>{listitem.createdAt}</label>
+                                <label>{(new Date(listitem.createdAt)).toLocaleDateString()}</label>
                             </div>
                             <div className="col-sm" >
-                                <label>{listitem.updatedAt}</label>
+                                <label>{(new Date(listitem.updatedAt)).toLocaleDateString()}</label>
                             </div>
                         </div>
                     ))}

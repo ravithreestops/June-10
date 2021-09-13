@@ -90,8 +90,8 @@ class QuoteList extends Component {
                                     </div>
 
                                     <div className="col-3 attachment-icon">
-                                        <small>{listitem.attachments && listitem.attachments.length}</small>
-                                        <small>Attachments</small>
+                                        <small>{listitem.Uploads}</small>
+                                        <small> Attachments</small>
                                     </div>
                                     <div className="col-2 rightarrow-icon">
                                         <small>View details</small>
