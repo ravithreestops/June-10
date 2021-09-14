@@ -51,6 +51,12 @@ body,
       color: #000;
       cursor: pointer;
     }
+    p.nav-link:hover {
+      background-color: #02464f;
+      border-radius: 3px;
+      color: #fcfcfc;
+    }
+
     &.nav-quote-req p {
       background: url("../images/quote.png") no-repeat 5px; 
       background-size: 25px;
@@ -318,6 +324,13 @@ p.ellipses_two {
     background-color: #c9cbcb;
     margin: 0 5px 0 0;
   }
+
+  .add-btn:hover,
+  .edit-btn:hover,
+  .delete-btn:hover {
+    background-color:#ffffff;
+  }
+
   .has-search {
     display: inline-block;
     width: 50%;

@@ -137,7 +137,9 @@ class QuoteDetail extends Component {
         });
     }
     renderUploadsSection(uploads) {
-        return (<div className="form-group">
+        return (
+        
+        <div className="form-group">
             <span className="underline blue">Uploads</span>
             {uploads && uploads.map((item, index) => {
                 return (
@@ -150,7 +152,10 @@ class QuoteDetail extends Component {
             })
 
             }
-        </div>);
+        </div>
+        
+        
+        );
     }
     renderMeasurementsDetailSection(measures) {
 

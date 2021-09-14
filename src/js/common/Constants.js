@@ -21,4 +21,10 @@ Verified
 1. login
 2. sidebar.js, MyAlert.js Popup.js
 
+
+git init .
+git add .
+git commit -a -m "commit message goes here"
+git push
+
 */

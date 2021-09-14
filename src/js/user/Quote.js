@@ -227,7 +227,7 @@ class UserQuote extends Component {
                                </div>
                                <div className="col">
                                 
-                                    <input type="text" className="form-control"
+                                    <input type="number" className="form-control"
                                         defaultValue={item.qty}
                                         onChange={this.handleMeasureChange.bind(this, item.id, 'qty')}
                                     />
@@ -260,12 +260,3 @@ class UserQuote extends Component {
     }
 }
 export default UserQuote;
-
-
-
-/*
-{"message":"Quote created!","data":{"title":"Quote3","desc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec malesuada augue id velit gravida fringilla. Suspendisse fermentum eget magna placerat pharetra.","status":"NEW","startDate":"2021-08-25T07:00:00.000Z","endDate":"2021-08-31T07:00:00.000Z","measures":[{"name":"ewe","unit":"erew","qty":"2312"}],"uploads":[{"fileName":"Screen Shot 2021-03-17 at 9.12.19 AM.png","filePath":"https://fuentes-fileupload.s3-us-west-1.amazonaws.com/quote-attachments/Screen Shot 2021-03-17 at 9.12.19 AM.png"}]}}
-
-
-{"message":"Quote created!","data":{"title":"Quote5","desc":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec malesuada augue id velit gravida fringilla. Suspendisse fermentum eget magna placerat pharetra.","status":"NEW","startDate":"2021-09-02T07:00:00.000Z","endDate":"2021-10-01T07:00:00.000Z","measures":[{"name":"das","unit":"dsf","qty":"2"}],"uploads":[{"fileName":"sample.png","filePath":"https://fuentes-fileupload.s3-us-west-1.amazonaws.com/quote-attachments/sample.png"}]}}
-*/

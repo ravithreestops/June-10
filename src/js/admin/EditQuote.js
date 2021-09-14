@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import { Button, Table } from 'reactstrap';
 import { Accordion, Card } from "react-bootstrap";
 
-import { statusColorClass } from '../common/Utils.js';
+import { statusColorClass, headerBtn } from '../common/Utils.js';
 import Popup from "../components/Popup";
 import TableHeader from "../components/TableHeader";
 import TableRow from "../components/TableRow";
 
 import AdminService from "../services/admin.service";
+
+import { validationMessages } from '../common/Constants';
 
 import operationJson from '../../data/quoteItem.json';
 
@@ -107,7 +109,7 @@ class QuoteReqUpdate extends Component {
 
 
     var tmptoolobj = [];
-    this.state.operationsList.QuoteOperationInv.map((item, i) => {
+    this.state.operationsList.QuoteOperationInv && this.state.operationsList.QuoteOperationInv.map((item, i) => {
       var toolobj = {};
       toolobj["invId"] = item.Inventories.id;
       toolobj["reqQty"] = parseInt(item.req_quantity);
@@ -116,7 +118,7 @@ class QuoteReqUpdate extends Component {
 
 
     var tmpworkerobj = [];
-    this.state.operationsList.QuoteOperationWorker.map((item, i) => {
+    this.state.operationsList.QuoteOperationWorker && this.state.operationsList.QuoteOperationWorker.map((item, i) => {
       var workerobj = {};
       workerobj["workerId"] = item.Workers.id;
       workerobj["totalHrs"] = parseInt(item.total_hrs_req);
@@ -195,9 +197,21 @@ class QuoteReqUpdate extends Component {
   handleBreadCrumb() {
     this.props.parentCallback();
   }
-  deleteOperation() {
-    alert("Do you want to delete this");
+  deleteOperation(opId,opName,event) {
+debugger;
+    this.setState({
+      deleteOpId: opId,
+      isPopupOpen: true,
+      popupConfig : {
+          header: "Confirm to Delete",
+          body:validationMessages.DELETE_CONFIRM+opName,
+          type: "confirmation"
+      }
+  });
+
+
   }
+
   removeTool() {
     alert("Do you want to remove tool");
   }
@@ -266,9 +280,22 @@ class QuoteReqUpdate extends Component {
   };
 
   handleModalYes = () => {
+
     this.setState({
       isPopupOpen: false
     });
+
+
+    var tempList = this.state.selectedItem.QuoteOperation.filter(item => item.Operations.id !== this.state.deleteOpId);
+    var tmpSelectedItem = this.state.selectedItem;
+    tmpSelectedItem.QuoteOperation = tempList;
+    this.setState({
+      selectedItem: tmpSelectedItem
+    });
+
+
+
+    /*
     AdminService.deleteQuote(this.state.selectedItem.id).then(
       response => {
         var tempList = this.state.listitems.filter(item => item.id !== this.state.selectedItem.id);
@@ -281,6 +308,7 @@ class QuoteReqUpdate extends Component {
         console.log("Error");
       }
     );
+    */
 
 
   };
@@ -432,22 +460,19 @@ class QuoteReqUpdate extends Component {
               </nav>
 
             </div>
-            {this.state.selectedItem.status === "QUOTE_PO_SUBMIT" &&
-              (
-                <div className="col-8 text-right">
+
+          
+
+            {headerBtn(this.state.selectedItem.status) > 4 ? ( <div className="col-8 text-right">
                   <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.changeQuoteStatus("QUOTE_REJECTED")} >Reject</button>
                   <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.changeQuoteStatus("PROJECT_IN_PROGRESS")}>Accept Purchase Order</button>
-                </div>
-
-              ) }
-             {this.state.selectedItem.status === "NEW" || this.state.selectedItem.status === "WIP"  || this.state.selectedItem.status === "QUOTE_RECEIVED" &&
-                <div className="col-8 text-right">
+                </div>) : (<div className="col-8 text-right">
                   <button type="button" className="btn btn-blue btn-sm pr-4 pl-4" onClick={() => this.resetReq()} >Reset</button>
                   <button type="button" className="btn btn-info btn-sm ml-2 pr-4 pl-4" onClick={() => this.saveQuoteUpdate()}>Save</button>
                   <button type="button" className="btn btn-green btn-sm ml-2 pr-4 pl-4" onClick={() => this.submitQuoteUpdate()}>Submit</button>
-                </div>
+                </div>)}
 
-            }
+
           </div>
           <div>
             <div className="blue-box-div row">
@@ -595,7 +620,7 @@ class QuoteReqUpdate extends Component {
                               </div>
                               <div className="col-sm">
                                 <label>{operation.QuoteOperationInv && operation.QuoteOperationInv.length}</label>
-                                <button onClick={this.deleteOperation.bind(this)} className="btn delete-btn float-right mr-5" ></button>
+                                <button onClick={this.deleteOperation.bind(this,operation.Operations.id,operation.Operations.name)} className="btn delete-btn float-right mr-5" ></button>
                               </div>
                             </div>
 
